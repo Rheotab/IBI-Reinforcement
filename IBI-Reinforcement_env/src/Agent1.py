@@ -30,24 +30,40 @@ if __name__ == '__main__':
     env.seed(0)
     agent = RandomAgent(env.action_space)
 
-    episode_count = 100
+    episode_count = 1000
     reward = 0
     done = False
 
     results = []
 
+
+    buffer_size = 10000
+
+    buffer = []
+
     for i in range(episode_count):
         ob = env.reset()
+
+
 
         nb_iter = 0
         while True:
             action = agent.act(ob, reward, done)
+            prec_ob = ob
             ob, reward, done, _ = env.step(action)
+
+            interaction = (prec_ob, action, ob, reward, done)
+            if len(buffer) > buffer_size:
+                buffer.pop(0)
+
+            buffer.append(interaction)
+
             nb_iter+=1
             if done:
                 break
 
         results.append(nb_iter)
+        print(buffer)
 
     plt.plot(results)
     plt.ylabel('number of iterations')
