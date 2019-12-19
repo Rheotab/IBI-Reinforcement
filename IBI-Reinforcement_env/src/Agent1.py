@@ -5,11 +5,20 @@ from gym import wrappers, logger
 
 class RandomAgent(object):
     """The world's simplest agent!"""
-    def __init__(self, action_space):
+    def __init__(self, action_space, buffer_size=10000:
         self.action_space = action_space
+        self.buffer_size = buffer_size
+        self.buffer = []
 
     def act(self, observation, reward, done):
         return self.action_space.sample()
+
+    def memorise(self, interaction):
+        if len(self.buffer) > self.buffer_size:
+            self.buffer.pop(0)
+
+        self.buffer.append(interaction)
+
 
 if __name__ == '__main__':
 
@@ -36,11 +45,6 @@ if __name__ == '__main__':
 
     results = []
 
-
-    buffer_size = 10000
-
-    buffer = []
-
     for i in range(episode_count):
         ob = env.reset()
 
@@ -53,17 +57,13 @@ if __name__ == '__main__':
             ob, reward, done, _ = env.step(action)
 
             interaction = (prec_ob, action, ob, reward, done)
-            if len(buffer) > buffer_size:
-                buffer.pop(0)
-
-            buffer.append(interaction)
+            agent.memorise(interaction)
 
             nb_iter+=1
             if done:
                 break
 
         results.append(nb_iter)
-        print(buffer)
 
     plt.plot(results)
     plt.ylabel('number of iterations')
