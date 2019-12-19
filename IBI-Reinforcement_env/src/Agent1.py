@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
-
+import torch
 import gym
 from gym import wrappers, logger
+from DQN import DQN
 
 class RandomAgent(object):
     """The world's simplest agent!"""
@@ -10,7 +11,12 @@ class RandomAgent(object):
         self.buffer_size = buffer_size
         self.buffer = []
 
+        self.qlearning_nn = DQN(128)
+
     def act(self, observation, reward, done):
+        qvalues = self.qlearning_nn(torch.Tensor(observation).reshape(1, 4))
+        print(qvalues)
+
         return self.action_space.sample()
 
     def memorise(self, interaction):
@@ -22,6 +28,10 @@ class RandomAgent(object):
 
 if __name__ == '__main__':
 
+    #HYPERPARAMETERS
+    episode_count = 1000
+    epsilon = 0.3
+
     # You can set the level to logger.DEBUG or logger.WARN if you
     # want to change the amount of output.
     logger.set_level(logger.INFO)
@@ -29,6 +39,7 @@ if __name__ == '__main__':
     env_id = 'CartPole-v0'
 
     env = gym.make(env_id)
+
 
     # You provide the directory to write to (can be an existing
     # directory, including one with existing data -- all monitor files
@@ -39,7 +50,7 @@ if __name__ == '__main__':
     env.seed(0)
     agent = RandomAgent(env.action_space)
 
-    episode_count = 1000
+
     reward = 0
     done = False
 
@@ -57,6 +68,7 @@ if __name__ == '__main__':
             ob, reward, done, _ = env.step(action)
 
             interaction = (prec_ob, action, ob, reward, done)
+            #print(interaction)
             agent.memorise(interaction)
 
             nb_iter+=1
