@@ -5,7 +5,7 @@ from gym import wrappers, logger
 
 class RandomAgent(object):
     """The world's simplest agent!"""
-    def __init__(self, action_space, buffer_size=10000:
+    def __init__(self, action_space, buffer_size=10000):
         self.action_space = action_space
         self.buffer_size = buffer_size
         self.buffer = []
