@@ -6,10 +6,11 @@ import random
 from gym import wrappers, logger
 from DQN import DQN
 import numpy as np
+import time
 
 class RandomAgent(object):
     """The world's simplest agent!"""
-    def __init__(self, action_space, buffer_size=10000, epsilon=0.3, batch_size=20, gamma=0.05, eta=0.001):
+    def __init__(self, action_space, buffer_size=10000, epsilon=0.3, batch_size=10, gamma=0.05, eta=0.001):
         self.action_space = action_space
         self.buffer_size = buffer_size
         self.buffer = []
@@ -71,39 +72,42 @@ class RandomAgent(object):
 
     def learn(self):
         minibatch = self.get_minibatch()
+        print(len(minibatch))
+
+        start = time.time()
 
         for interaction in minibatch:
-            self.optimiser.zero_grad()
+
+
+
             qvalues = self.qlearning_nn(torch.Tensor(interaction[0].reshape(1,4)))
             #qval_np = qvalues.detach().numpy()
-            qval_prec = qvalues.data[0][interaction[1]]
 
-            reward = interaction[3]
+
+            etat_prec = torch.Tensor(interaction[0])
+            action = interaction[1]
+            etat_suiv = torch.Tensor(interaction[2])
+            qval_prec = qvalues[0][action]
 
             if interaction[4]:
                 # loss = torch.from_numpy(np.array([(qval_prec - reward)**2]))
                 #loss = torch.Tensor([float((qval_prec - reward)**2)])
-                loss = F.mse_loss(qval_prec, reward)
+                loss = F.mse_loss(qval_prec, torch.Tensor([reward]))
 
             else:
                 qvalues_next = self.qlearning_nn(torch.Tensor(interaction[2].reshape(1,4)))
-                qmax = torch.max(qvalues_next.data[0])
+                qmax = torch.max(qvalues_next[0])
 
-                loss = F.mse_loss(qval_prec, reward + gamma * qmax)
-
-                print(loss)
+                loss = F.mse_loss(qval_prec, torch.Tensor([reward + gamma * qmax]))
 
                 # loss = torch.from_numpy(np.array([(qval_prec - (reward + gamma * qmax))**2]))
                # loss = torch.Tensor([float((qval_prec - (reward + gamma * qmax))**2)])
 
-
-
+            self.optimiser.zero_grad()
             loss.backward()
             self.optimiser.step()
 
-        #qvalues = self.qlearning_nn(torch.Tensor(observation).reshape(1, 4))
-
-
+        #print(time.time() - start)
 
 if __name__ == '__main__':
 
