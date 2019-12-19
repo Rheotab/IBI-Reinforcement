@@ -1,15 +1,17 @@
 import matplotlib.pyplot as plt
 import torch
 import gym
+import random
 from gym import wrappers, logger
 from DQN import DQN
 
 class RandomAgent(object):
     """The world's simplest agent!"""
-    def __init__(self, action_space, buffer_size=10000):
+    def __init__(self, action_space, buffer_size=10000, epsilon=0.3):
         self.action_space = action_space
         self.buffer_size = buffer_size
         self.buffer = []
+        self.eps = epsilon
 
         self.qlearning_nn = DQN(128)
 
@@ -17,7 +19,15 @@ class RandomAgent(object):
         qvalues = self.qlearning_nn(torch.Tensor(observation).reshape(1, 4))
         print(qvalues)
 
-        return self.action_space.sample()
+        print((qvalues[0] == qvalues[0][0]).nonzero()[0][0])
+        print(self.action_space[(qvalues[0] == qvalues[0][0]).nonzero()[0][0]])
+
+        if random.random() < self.eps:
+
+
+            return self.action_space[(qvalues == qvalues.sample()).nonzero()]
+        return self.action_space[qvalues.index(max(qvalues))]
+
 
     def memorise(self, interaction):
         if len(self.buffer) > self.buffer_size:
