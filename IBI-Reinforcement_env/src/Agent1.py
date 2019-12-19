@@ -1,35 +1,37 @@
 import matplotlib.pyplot as plt
 import torch
+import torch.nn.functional as F
 import gym
 import random
 from gym import wrappers, logger
 from DQN import DQN
-import math
 import numpy as np
-import random as rand
 
 class RandomAgent(object):
     """The world's simplest agent!"""
-    def __init__(self, action_space, buffer_size=10000, epsilon=0.3):
+    def __init__(self, action_space, buffer_size=10000, epsilon=0.3, batch_size=20, gamma=0.05, eta=0.001):
         self.action_space = action_space
         self.buffer_size = buffer_size
         self.buffer = []
         self.eps = epsilon
+        self.batch_size = batch_size
+        self.gamma = gamma
 
         self.qlearning_nn = DQN(128)
+        self.optimiser = torch.optim.Adam(self.qlearning_nn.parameters(), lr=eta)
+
+        #self.target_network = self.qlearning_nn.clone()
+
 
     def act(self, observation, reward, done):
         qvalues = self.qlearning_nn(torch.Tensor(observation).reshape(1, 4))
-        self.politique_boltzmann(qvalues, 0.1)
 
-        print((qvalues[0] == qvalues[0][0]).nonzero()[0][0])
-        print(self.action_space[(qvalues[0] == qvalues[0][0]).nonzero()[0][0]])
+        #self.politique_boltzmann(qvalues, 0.1)
+        value = self.politique_greedy(qvalues)
 
-        if random.random() < self.eps:
+        return value
 
 
-            return self.action_space[(qvalues == qvalues.sample()).nonzero()]
-        return self.action_space[qvalues.index(max(qvalues))]
 
 
     def memorise(self, interaction):
@@ -38,6 +40,16 @@ class RandomAgent(object):
 
         self.buffer.append(interaction)
 
+
+
+    def politique_greedy(self, qval):
+
+        qval_np = qval.detach().numpy()
+        if random.random() < self.eps:
+            return np.where(qval_np[0] == np.random.choice(qval_np[0], size=1))[0][0]
+        return np.argmax(qval_np[0])
+
+    # FIXME index
     def politique_boltzmann(self, qval, tau):
         qval_np = qval.detach().numpy()
         s = 0
@@ -49,13 +61,47 @@ class RandomAgent(object):
             prob = np.append(prob, (p_a/s))
             r = random.uniform(0,1)
             if r < prob[0]:
-                return self.action_space[0]
+                return 0
             else:
-                return self.action_space[1]
+                return 1
+
+    def get_minibatch(self):
+        return random.choices(self.buffer, k=self.batch_size)
+
+
+    def learn(self):
+        minibatch = self.get_minibatch()
+
+        for interaction in minibatch:
+            self.optimiser.zero_grad()
+            qvalues = self.qlearning_nn(torch.Tensor(interaction[0].reshape(1,4)))
+            #qval_np = qvalues.detach().numpy()
+            qval_prec = qvalues.data[0][interaction[1]]
+
+            reward = interaction[3]
+
+            if interaction[4]:
+                # loss = torch.from_numpy(np.array([(qval_prec - reward)**2]))
+                #loss = torch.Tensor([float((qval_prec - reward)**2)])
+                loss = F.mse_loss(qval_prec, reward)
+
+            else:
+                qvalues_next = self.qlearning_nn(torch.Tensor(interaction[2].reshape(1,4)))
+                qmax = torch.max(qvalues_next.data[0])
+
+                loss = F.mse_loss(qval_prec, reward + gamma * qmax)
+
+                print(loss)
+
+                # loss = torch.from_numpy(np.array([(qval_prec - (reward + gamma * qmax))**2]))
+               # loss = torch.Tensor([float((qval_prec - (reward + gamma * qmax))**2)])
 
 
 
-           
+            loss.backward()
+            self.optimiser.step()
+
+        #qvalues = self.qlearning_nn(torch.Tensor(observation).reshape(1, 4))
 
 
 
@@ -64,6 +110,8 @@ if __name__ == '__main__':
     #HYPERPARAMETERS
     episode_count = 1000
     epsilon = 0.3
+    batch_size = 200
+    gamma = 0.05
 
     # You can set the level to logger.DEBUG or logger.WARN if you
     # want to change the amount of output.
@@ -103,6 +151,8 @@ if __name__ == '__main__':
             interaction = (prec_ob, action, ob, reward, done)
             #print(interaction)
             agent.memorise(interaction)
+
+            agent.learn()
 
             nb_iter+=1
             if done:

@@ -10,6 +10,7 @@ class DQN(torch.nn.Module):
         self.nn1 = torch.nn.Linear(4, D_H)
         self.nn2 = torch.nn.Linear(D_H, D_out)
 
+
     def forward(self, x):
         # x = F.relu(self.conv1(x))
         # x = F.max_pool2d(x, 2)
