@@ -3,6 +3,9 @@ import torch
 import gym
 from gym import wrappers, logger
 from DQN import DQN
+import math
+import numpy as np
+import random as rand
 
 class RandomAgent(object):
     """The world's simplest agent!"""
@@ -15,7 +18,7 @@ class RandomAgent(object):
 
     def act(self, observation, reward, done):
         qvalues = self.qlearning_nn(torch.Tensor(observation).reshape(1, 4))
-        print(qvalues)
+        self.politique_boltzmann(qvalues, 0.1)
 
         return self.action_space.sample()
 
@@ -24,6 +27,26 @@ class RandomAgent(object):
             self.buffer.pop(0)
 
         self.buffer.append(interaction)
+
+    def politique_boltzmann(self, qval, tau):
+        qval_np = qval.detach().numpy()
+        s = 0
+        prob = np.array([])
+        for i in qval_np[0]:
+            s += np.exp(i/tau)
+        for a in qval_np:
+            p_a = np.exp(a/tau)
+            prob = np.append(prob, (p_a/s))
+            r = random.uniform(0,1)
+            if r < prob[0]:
+                return self.action_space[0]
+            else:
+                return self.action_space[1]
+
+
+
+           
+
 
 
 if __name__ == '__main__':
