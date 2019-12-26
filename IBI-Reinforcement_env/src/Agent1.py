@@ -7,26 +7,34 @@ from gym import wrappers, logger
 from DQN import DQN
 import numpy as np
 import time
+import copy
 
-class RandomAgent(object):
+class Agent(object):
     """The world's simplest agent!"""
-    def __init__(self, action_space, buffer_size=10000, epsilon=0.3, batch_size=10, gamma=0.05, eta=0.001):
+    def __init__(self, action_space, buffer_size=10000, epsilon=0.3, batch_size=10, gamma=0.05, eta=0.001, N = 10000):
         self.action_space = action_space
         self.buffer_size = buffer_size
         self.buffer = []
         self.eps = epsilon
         self.batch_size = batch_size
         self.gamma = gamma
+        self.eta = eta
+        self.N = N
+        self.count_N = 0
 
         self.qlearning_nn = DQN(128)
-        self.optimiser = torch.optim.Adam(self.qlearning_nn.parameters(), lr=eta)
+        self.target_network = DQN(128)
+        self.target_network.load_state_dict(self.qlearning_nn.state_dict())
+        self.optimiser = torch.optim.Adam(self.qlearning_nn.parameters(), lr=self.eta)
 
-        #self.target_network = self.qlearning_nn.clone()
+        self.arr_loss = []
+
 
 
     def act(self, observation, reward, done):
-        qvalues = self.qlearning_nn(torch.Tensor(observation).reshape(1, 4))
 
+        qvalues = self.qlearning_nn(torch.Tensor(observation).reshape(1,4))
+        #qvalues = self.target_network(torch.Tensor(observation).reshape(1, 4))
         #self.politique_boltzmann(qvalues, 0.1)
         value = self.politique_greedy(qvalues)
 
@@ -44,7 +52,6 @@ class RandomAgent(object):
 
 
     def politique_greedy(self, qval):
-
         qval_np = qval.detach().numpy()
         if random.random() < self.eps:
             return np.where(qval_np[0] == np.random.choice(qval_np[0], size=1))[0][0]
@@ -71,105 +78,46 @@ class RandomAgent(object):
 
 
     def learn(self):
+        self.count_N += 1
         minibatch = self.get_minibatch()
-        print(len(minibatch))
-
+        #print(len(minibatch))
         start = time.time()
-
         for interaction in minibatch:
-
-
-
-            qvalues = self.qlearning_nn(torch.Tensor(interaction[0].reshape(1,4)))
-            #qval_np = qvalues.detach().numpy()
-
-
-            etat_prec = torch.Tensor(interaction[0])
+            state = torch.Tensor(interaction[0]).reshape(1, 4)
+            state_next = torch.Tensor(interaction[2]).reshape(1, 4)
+            qvalues = self.qlearning_nn(state)
+            #etat_prec = torch.Tensor(interaction[0])
             action = interaction[1]
-            etat_suiv = torch.Tensor(interaction[2])
+            reward = interaction[3]
+            # etat_suiv = torch.Tensor(interaction[2])
             qval_prec = qvalues[0][action]
 
             if interaction[4]:
                 # loss = torch.from_numpy(np.array([(qval_prec - reward)**2]))
                 #loss = torch.Tensor([float((qval_prec - reward)**2)])
-                loss = F.mse_loss(qval_prec, torch.Tensor([reward]))
-
+                tmp = torch.Tensor([reward]).reshape(1)
             else:
-                qvalues_next = self.qlearning_nn(torch.Tensor(interaction[2].reshape(1,4)))
+                #qvalues_next = self.qlearning_nn(torch.Tensor(interaction[2].reshape(1,4)))
+                qvalues_next = self.target_network(state_next)
                 qmax = torch.max(qvalues_next[0])
+                #print(qval_prec.shape)
 
-                loss = F.mse_loss(qval_prec, torch.Tensor([reward + gamma * qmax]))
-
+                tmp = torch.Tensor([reward + self.gamma * qmax]).reshape(1)
                 # loss = torch.from_numpy(np.array([(qval_prec - (reward + gamma * qmax))**2]))
                # loss = torch.Tensor([float((qval_prec - (reward + gamma * qmax))**2)])
-
+            loss = F.mse_loss(qval_prec.reshape(1), tmp)
+            self.arr_loss.append(loss)
             self.optimiser.zero_grad()
             loss.backward()
             self.optimiser.step()
+        if self.N == self.count_N:
+            self.count_N = 0
+           # self.target_network = copy.deepcopy(self.qlearning_nn)
+            self.target_network.load_state_dict(self.qlearning_nn.state_dict())
+
+
+    def show_loss(self):
+        plt.plot(self.arr_loss)
+        plt.show()
 
         #print(time.time() - start)
-
-if __name__ == '__main__':
-
-    #HYPERPARAMETERS
-    episode_count = 1000
-    epsilon = 0.3
-    batch_size = 200
-    gamma = 0.05
-
-    # You can set the level to logger.DEBUG or logger.WARN if you
-    # want to change the amount of output.
-    logger.set_level(logger.INFO)
-
-    env_id = 'CartPole-v0'
-
-    env = gym.make(env_id)
-
-
-    # You provide the directory to write to (can be an existing
-    # directory, including one with existing data -- all monitor files
-    # will be namespaced). You can also dump to a tempdir if you'd
-    # like: tempfile.mkdtemp().
-    outdir = '/tmp/random-agent-results'
-    env = wrappers.Monitor(env, directory=outdir, force=True)
-    env.seed(0)
-    agent = RandomAgent(env.action_space)
-
-
-    reward = 0
-    done = False
-
-    results = []
-
-    for i in range(episode_count):
-        ob = env.reset()
-
-
-
-        nb_iter = 0
-        while True:
-            action = agent.act(ob, reward, done)
-            prec_ob = ob
-            ob, reward, done, _ = env.step(action)
-
-            interaction = (prec_ob, action, ob, reward, done)
-            #print(interaction)
-            agent.memorise(interaction)
-
-            agent.learn()
-
-            nb_iter+=1
-            if done:
-                break
-
-        results.append(nb_iter)
-
-    plt.plot(results)
-    plt.ylabel('number of iterations')
-    plt.show()
-            # Note there's no env.render() here. But the environment still can open window and
-            # render if asked by env.monitor: it calls env.render('rgb_array') to record video.
-            # Video is not recorded every episode, see capped_cubic_video_schedule for details.
-
-    # Close the env and write monitor result info to disk
-    # env.close()
