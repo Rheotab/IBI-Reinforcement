@@ -10,7 +10,7 @@ import time
 if __name__ == '__main__':
 
     #HYPERPARAMETERS
-    episode_count = 1000
+    episode_count = 400
     epsilon = 0.3
     batch_size = 200
     gamma = 0.05
@@ -31,7 +31,7 @@ if __name__ == '__main__':
     outdir = '/tmp/CartPole-v0'
     env = wrappers.Monitor(env, directory=outdir, force=True)
     env.seed(0)
-    agent = Agent(env.action_space, buffer_size=100000, epsilon=0.3, batch_size=10, gamma=0.05, eta=0.0001, N=10000)
+    agent = Agent(env.action_space, buffer_size=100000, epsilon=0.3, batch_size=100, gamma=0.01, eta=0.001, N=10000)
 
 
     reward = 0

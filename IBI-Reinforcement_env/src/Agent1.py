@@ -37,7 +37,6 @@ class Agent(object):
         #qvalues = self.target_network(torch.Tensor(observation).reshape(1, 4))
         #self.politique_boltzmann(qvalues, 0.1)
         value = self.politique_greedy(qvalues)
-
         return value
 
 
@@ -91,7 +90,6 @@ class Agent(object):
             reward = interaction[3]
             # etat_suiv = torch.Tensor(interaction[2])
             qval_prec = qvalues[0][action]
-
             if interaction[4]:
                 # loss = torch.from_numpy(np.array([(qval_prec - reward)**2]))
                 #loss = torch.Tensor([float((qval_prec - reward)**2)])
