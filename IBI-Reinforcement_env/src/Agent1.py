@@ -11,7 +11,7 @@ import copy
 
 class Agent(object):
     """The world's simplest agent!"""
-    def __init__(self, action_space, buffer_size=10000, epsilon=0.3, batch_size=10, gamma=0.05, eta=0.001, N = 10000):
+    def __init__(self, action_space, buffer_size=10000, epsilon=0.3, batch_size=10, gamma=0.05, eta=0.001, N = 100):
         self.action_space = action_space
         self.buffer_size = buffer_size
         self.buffer = []
@@ -22,8 +22,8 @@ class Agent(object):
         self.N = N
         self.count_N = 0
 
-        self.qlearning_nn = DQN(128)
-        self.target_network = DQN(128)
+        self.qlearning_nn = DQN(64)
+        self.target_network = DQN(64)
         self.target_network.load_state_dict(self.qlearning_nn.state_dict())
         self.optimiser = torch.optim.Adam(self.qlearning_nn.parameters(), lr=self.eta)
 
@@ -32,7 +32,6 @@ class Agent(object):
 
 
     def act(self, observation, reward, done):
-
         qvalues = self.qlearning_nn(torch.Tensor(observation).reshape(1,4))
         #qvalues = self.target_network(torch.Tensor(observation).reshape(1, 4))
         #self.politique_boltzmann(qvalues, 0.1)
@@ -51,7 +50,7 @@ class Agent(object):
 
 
     def politique_greedy(self, qval):
-        qval_np = qval.detach().numpy()
+        qval_np = qval.clone().detach().numpy()
         if random.random() < self.eps:
             return np.where(qval_np[0] == np.random.choice(qval_np[0], size=1))[0][0]
         return np.argmax(qval_np[0])

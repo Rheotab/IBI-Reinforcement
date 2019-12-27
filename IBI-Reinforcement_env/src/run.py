@@ -31,7 +31,7 @@ if __name__ == '__main__':
     outdir = '/tmp/CartPole-v0'
     env = wrappers.Monitor(env, directory=outdir, force=True)
     env.seed(0)
-    agent = Agent(env.action_space, buffer_size=100000, epsilon=0.3, batch_size=100, gamma=0.01, eta=0.001, N=10000)
+    agent = Agent(env.action_space, buffer_size=100000, epsilon=0.1, batch_size=100, gamma=0.01, eta=0.001, N=100)
 
 
     reward = 0

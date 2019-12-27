@@ -6,8 +6,8 @@ import copy
 class DQN(torch.nn.Module):
     def __init__(self, D_H, D_out=2):
         super(DQN, self).__init__()
-        # self.conv1 = torch.nn.Conv2d(1, 10, kernel_size=2) # stripe / padding
-        # self.conv2 = torch.nn.Conv2d(10, 20, kernel_size=2)
+        #self.conv1 = torch.nn.Conv2d(1, 4, kernel_size=1, stride=1)
+       # self.conv2 = torch.nn.Conv2d(10, 20, kernel_size=1, stride=1)
         #self.conv1 = torch.nn.Conv2d(1, 16, kernel_size=2, stride=1)
         #self.conv2 = torch.nn.Conv2d(16, 32, kernel_size=2, stride=1)
         self.nn1 = torch.nn.Linear(4, D_H)
@@ -17,10 +17,10 @@ class DQN(torch.nn.Module):
 
 
     def forward(self, x):
-       # x = F.relu(self.conv1(x))
-        # x = F.max_pool2d(x, 2)
+        #x = F.relu(self.conv1(x))
+        #x = F.max_pool2d(x, 2)
         # x = F.relu(self.conv2(x))
-        # x = F.max_pool2d(x, 2)
+       #  x = F.max_pool2d(x, 2)
         # x = torch.flatten(x, 1)
         x = F.relu(self.nn1(x))
         x = F.relu(self.nn2(x))
