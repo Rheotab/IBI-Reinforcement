@@ -20,6 +20,7 @@ if __name__ == '__main__':
     logger.set_level(logger.INFO)
 
     env_id = 'CartPole-v0'
+    #env_id = 'BreakoutNoFrameskip-v4'
 
     env = gym.make(env_id)
 
@@ -29,9 +30,14 @@ if __name__ == '__main__':
     # will be namespaced). You can also dump to a tempdir if you'd
     # like: tempfile.mkdtemp().
     outdir = '/tmp/CartPole-v0'
-    env = wrappers.Monitor(env, directory=outdir, force=True)
+    #outdir = '/tmp/BreakoutNoFrameskip-v4'
+
+    def recorder(episode_id):
+        return episode_id % 10 == 0
+
+    env = wrappers.Monitor(env,video_callable=recorder, directory=outdir, force=True)
     env.seed(0)
-    agent = Agent(env.action_space, buffer_size=100000, epsilon=0.1, batch_size=100, gamma=0.01, eta=0.001, N=100)
+    agent = Agent(env.action_space, buffer_size=100000, epsilon=0.05, batch_size=100, gamma=0.01, eta=0.001, N=100)
 
 
     reward = 0
@@ -40,7 +46,7 @@ if __name__ == '__main__':
     results = []
 
     for i in range(episode_count):
-        print("EP " + str(i))
+
         ob = env.reset()
         nb_iter = 0
         done = False
@@ -53,6 +59,7 @@ if __name__ == '__main__':
             agent.memorise(interaction)
             agent.learn()
             nb_iter+=1
+        print("EP " + str(i) + " - score " + str(nb_iter))
         results.append(nb_iter)
     agent.show_loss()
     plt.plot(results)
