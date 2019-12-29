@@ -5,6 +5,7 @@ import gym
 import random
 from gym import wrappers, logger
 from DQN import DQN
+from Memory import Memory
 import numpy as np
 import time
 import copy
@@ -13,15 +14,13 @@ class Agent(object):
     """The world's simplest agent!"""
     def __init__(self, action_space, buffer_size=10000, epsilon=0.3, batch_size=10, gamma=0.05, eta=0.001, N = 100):
         self.action_space = action_space
-        self.buffer_size = buffer_size
-        self.buffer = []
         self.eps = epsilon
         self.batch_size = batch_size
         self.gamma = gamma
         self.eta = eta
         self.N = N
         self.count_N = 0
-
+        self.memory = Memory(buffer_size)
         self.qlearning_nn = DQN(64)
         self.target_network = DQN(64)
         self.target_network.load_state_dict(self.qlearning_nn.state_dict())
@@ -42,11 +41,7 @@ class Agent(object):
 
 
     def memorise(self, interaction):
-        if len(self.buffer) > self.buffer_size:
-            self.buffer.pop(0)
-
-        self.buffer.append(interaction)
-
+        self.memory.add(interaction)
 
 
     def politique_greedy(self, qval):
@@ -71,13 +66,10 @@ class Agent(object):
             else:
                 return 1
 
-    def get_minibatch(self):
-        return random.choices(self.buffer, k=self.batch_size)
-
 
     def learn(self):
         self.count_N += 1
-        minibatch = self.get_minibatch()
+        minibatch = self.memory.get_mini_batch(self.batch_size)
         #print(len(minibatch))
         start = time.time()
         for interaction in minibatch:
