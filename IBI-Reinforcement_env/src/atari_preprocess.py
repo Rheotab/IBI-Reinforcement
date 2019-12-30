@@ -4,7 +4,10 @@ import gym
 from gym.spaces import Box
 from gym.wrappers import TimeLimit
 
-
+'''
+Taken from : 
+https://github.com/openai/gym/blob/master/gym/wrappers/atari_preprocessing.py
+'''
 class AtariPreprocessing(gym.Wrapper):
     r"""Atari 2600 preprocessings.
     This class follows the guidelines in

@@ -29,7 +29,7 @@ class Agent(object):
 
 
     def act(self, observation, reward, done):
-        qvalues = self.qlearning_nn(torch.Tensor(observation).reshape(1,4)) # fixme reshape
+        qvalues = self.qlearning_nn(torch.Tensor(observation))
         value = self.politique_greedy(qvalues)
         return value
 
@@ -63,8 +63,8 @@ class Agent(object):
         self.count_N += 1
         minibatch = self.memory.get_mini_batch(self.batch_size)
         for interaction in minibatch:
-            state = torch.Tensor(interaction[0]).reshape(1, 4) # fixme
-            state_next = torch.Tensor(interaction[2]).reshape(1, 4) #fixme
+            state = torch.Tensor(interaction[0])
+            state_next = torch.Tensor(interaction[2])
             qvalues = self.qlearning_nn(state)
             action = interaction[1]
             reward = interaction[3]
