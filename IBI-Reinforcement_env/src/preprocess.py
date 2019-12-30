@@ -1,5 +1,6 @@
 import gym
 import numpy as np
+import cv2
 
 '''
 Inspired by
@@ -18,54 +19,44 @@ value over the frame being encoded and the previous frame.
 
 class Preprocess(gym.Wrapper):
 
-    def __init__(self, env, size_wrap=4, skip_frame=4, screen_size=84, norm=False):
+    def __init__(self, env, noop_max=30, size_wrap=4, skip_frame=4, screen_size=84, norm=False):
         super(Preprocess, self).__init__(env)
         self.size_wrap = 4
         self.skip_frame = 4
         self.norm = norm
         self.screen_size = screen_size
-        self.obs_buffer = [np.empty(env.observation_space.shape[:2], dtype=np.uint8),
-                           np.empty(env.observation_space.shape[:2], dtype=np.uint8)]
         self.ale = env.unwrapped.ale
+        self.noop_max = noop_max
+        #pd = self.env.unwrapped.get_action_meanings()
+        #print("iuha")
+
 
     def step(self, action):
         R = 0.0
-        res = []
+        res = None
         done = False
         for t in range(self.size_wrap):
             ob, reward, done, info = self.env.step(action)
+            R += reward
+            # Shape
+            ob = cv2.resize(ob, (self.screen_size, self.screen_size), interpolation=cv2.INTER_AREA)
+            # Max R,G,B
+            ob = np.max(ob, axis=2)
+            if res is None:
+                res = np.array([ob])
+            else:
+                res = np.append(res, [ob], axis=0)
             if done:
                 break
-            R += reward
-            # FIXME RESHAPE OB
-            res.append(ob)
         if not done:
-            np.maximum(self.ob[self.size_wrap - 2], self.obs_buffer[self.size_wrap - 1], out=self.obs_buffer[self.size_wrap - 1])
-
+            np.maximum(res[self.size_wrap - 2], res[self.size_wrap - 1], out=res[self.size_wrap - 1])
         if self.norm:
             res = np.asarray(res, dtype=np.float32) / 255.0
         else:
             res = np.asarray(res, dtype=np.uint8)
         return res, R, done, None
 
+
     def reset(self, **kwargs):  # NoopReset
         self.env.reset(**kwargs)
-        noops = self.env.unwrapped.np_random.randint(1, self.noop_max + 1) if self.noop_max > 0 else 0
-        for _ in range(noops):
-            _, _, done, _ = self.env.step(0)
-            if done:
-                self.env.reset(**kwargs)
-        self.ale.getScreenGrayscale(self.obs_buffer[0])
-        self.obs_buffer[1].fill(0)
-        return self._get_obs()
-
-    def _get_obs(self):
-        import cv2
-        if self.frame_skip > 1:  # more efficient in-place pooling
-            np.maximum(self.obs_buffer[0], self.obs_buffer[1], out=self.obs_buffer[0])
-        obs = cv2.resize(self.obs_buffer[0], (self.screen_size, self.screen_size), interpolation=cv2.INTER_AREA)
-        if self.norm:
-            obs = np.asarray(obs, dtype=np.float32) / 255.0
-        else:
-            obs = np.asarray(obs, dtype=np.uint8)
-        return obs
+        return self.step(0) ## FIXME WE HAVE TO MAKE SURE THIS IS NOOP

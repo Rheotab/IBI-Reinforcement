@@ -5,7 +5,8 @@ from gym import wrappers, logger
 import numpy as np
 import time
 from Agent_Breakout import Agent
-from atari_preprocess import AtariPreprocessing
+# from atari_preprocess import AtariPreprocessing
+from preprocess import Preprocess
 
 if __name__ == '__main__':
 
@@ -31,7 +32,7 @@ if __name__ == '__main__':
         return episode_id % 10 == 0
 
 
-    env = AtariPreprocessing(env)
+    env = Preprocess(env)
     env = wrappers.Monitor(env, video_callable=recorder, directory=outdir, force=True)
     env.seed(0)
     agent = Agent(nb_ep=episode_count, action_space=env.action_space, buffer_size=2000, epsilon=0.5, batch_size=64,
