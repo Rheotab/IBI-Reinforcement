@@ -35,7 +35,7 @@ class AtariPreprocessing(gym.Wrapper):
     """
 
     def __init__(self, env, noop_max=30, frame_skip=4, screen_size=84, terminal_on_life_loss=False, grayscale_obs=True,
-                 scale_obs=False):
+                 scale_obs=False, stack_size= 4):
         super().__init__(env)
         assert frame_skip > 0
         assert screen_size > 0
@@ -51,7 +51,8 @@ class AtariPreprocessing(gym.Wrapper):
         self.terminal_on_life_loss = terminal_on_life_loss
         self.grayscale_obs = grayscale_obs
         self.scale_obs = scale_obs
-
+        self.stack_size = stack_size
+        self.stack = []
         # buffer of most recent two observations for max pooling
         if grayscale_obs:
             self.obs_buffer = [np.empty(env.observation_space.shape[:2], dtype=np.uint8),
@@ -72,17 +73,10 @@ class AtariPreprocessing(gym.Wrapper):
 
     def step(self, action):
         R = 0.0
-
         for t in range(self.frame_skip):
             _, reward, done, info = self.env.step(action)
             R += reward
             self.game_over = done
-
-            if self.terminal_on_life_loss:
-                new_lives = self.ale.lives()
-                done = done or new_lives < self.lives
-                self.lives = new_lives
-
             if done:
                 break
             if t == self.frame_skip - 2:
@@ -105,8 +99,6 @@ class AtariPreprocessing(gym.Wrapper):
             _, _, done, _ = self.env.step(0)
             if done:
                 self.env.reset(**kwargs)
-
-        self.lives = self.ale.lives()
         if self.grayscale_obs:
             self.ale.getScreenGrayscale(self.obs_buffer[0])
         else:
@@ -119,7 +111,6 @@ class AtariPreprocessing(gym.Wrapper):
         if self.frame_skip > 1:  # more efficient in-place pooling
             np.maximum(self.obs_buffer[0], self.obs_buffer[1], out=self.obs_buffer[0])
         obs = cv2.resize(self.obs_buffer[0], (self.screen_size, self.screen_size), interpolation=cv2.INTER_AREA)
-
         if self.scale_obs:
             obs = np.asarray(obs, dtype=np.float32) / 255.0
         else:

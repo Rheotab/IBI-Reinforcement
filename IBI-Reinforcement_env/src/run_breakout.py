@@ -34,8 +34,8 @@ if __name__ == '__main__':
     env = AtariPreprocessing(env)
     env = wrappers.Monitor(env, video_callable=recorder, directory=outdir, force=True)
     env.seed(0)
-    agent = Agent(nb_ep=episode_count, action_space=env.action_space, buffer_size=20000, epsilon=0.5, batch_size=100,
-                  gamma=0.9, eta=0.001, N=500)
+    agent = Agent(nb_ep=episode_count, action_space=env.action_space, buffer_size=2000, epsilon=0.5, batch_size=64,
+                  gamma=0.8, eta=0.0005, N=500)
 
     reward = 0
     done = False
@@ -57,6 +57,7 @@ if __name__ == '__main__':
             nb_iter += 1
         print("EP " + str(i) + " - score " + str(nb_iter))
         results.append(nb_iter)
+    env.close()
     agent.show_mean_loss_ep()
     plt.plot(results)
     plt.ylabel('number of iterations')

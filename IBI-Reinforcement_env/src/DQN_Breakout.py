@@ -6,9 +6,10 @@ import copy
 class Net(torch.nn.Module):
     def __init__(self, D_H, D_out=2):
         super(Net, self).__init__()
-        self.conv1 = torch.nn.Conv2d(1, 84, 84, kernel_size=1, stride=1)
-        self.conv2 = torch.nn.Conv2d(10, 20, kernel_size=1, stride=1)
-        self.nn1 = torch.nn.Linear(4, D_H)
+        self.conv1 = torch.nn.Conv2d(4, 20, kernel_size=1, stride=1)
+        print(self.conv1.weight.shape)
+        self.conv2 = torch.nn.Conv2d(20, 20, kernel_size=1, stride=1)
+        self.nn1 = torch.nn.Linear(20, D_H)
         self.nn2 = torch.nn.Linear(D_H, D_out)
         self.D_H = D_H
         self.D_out = D_out
