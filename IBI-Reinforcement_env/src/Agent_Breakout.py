@@ -10,23 +10,23 @@ import numpy as np
 import time
 import copy
 
+
 class Agent(object):
-    def __init__(self,nb_ep, action_space, buffer_size=10000, epsilon=0.3, batch_size=10, gamma=0.05, eta=0.005, N = 100):
+    def __init__(self, nb_ep, action_space, buffer_size=10000, epsilon=0.3, batch_size=10, gamma=0.05, eta=0.005,
+                 N=100):
         self.action_space = action_space
-        self.eps = epsilon # e-greedy
-        self.batch_size = batch_size # what do we learn
-        self.gamma = gamma # how much is the importance of reward in learning
-        self.eta = eta # learning rate
-        self.N = N # When do we transfer to target -> Improve stability
+        self.eps = epsilon  # e-greedy
+        self.batch_size = batch_size  # what do we learn
+        self.gamma = gamma  # how much is the importance of reward in learning
+        self.eta = eta  # learning rate
+        self.N = N  # When do we transfer to target -> Improve stability
         self.count_N = 0
         self.memory = Memory(buffer_size)
-        self.qlearning_nn = Net(64) # FIXME
-        self.target_network = Net(64) # FIXME
+        self.qlearning_nn = Net(64)  # FIXME
+        self.target_network = Net(64)  # FIXME
         self.target_network.load_state_dict(self.qlearning_nn.state_dict())
         self.optimiser = torch.optim.Adam(self.qlearning_nn.parameters(), lr=self.eta)
         self.arr_loss = []
-
-
 
     def act(self, observation, reward, done):
         qvalues = self.qlearning_nn(torch.Tensor(observation))
@@ -44,20 +44,8 @@ class Agent(object):
 
     # FIXME index
     def politique_boltzmann(self, qval, tau):
-        qval_np = qval.detach().numpy()
-        s = 0
-        prob = np.array([])
-        for i in qval_np[0]:
-            s += np.exp(i/tau)
-        for a in qval_np:
-            p_a = np.exp(a/tau)
-            prob = np.append(prob, (p_a/s))
-            r = random.uniform(0,1)
-            if r < prob[0]:
-                return 0
-            else:
-                return 1
-
+        # TODO
+        pass
 
     def learn(self):
         self.count_N += 1

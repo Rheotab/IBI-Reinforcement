@@ -44,7 +44,7 @@ if __name__ == '__main__':
     results = []
 
     for i in range(episode_count):
-        ob = env.reset()
+        ob, reward, done, _ = env.reset()
         nb_iter = 0
         done = False
         while not done:
