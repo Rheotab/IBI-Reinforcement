@@ -22,8 +22,8 @@ class Agent(object):
         self.N = N
         self.count_N = 0
         self.memory = Memory(buffer_size)
-        self.qlearning_nn = DQN.DQN_two(25, 20)
-        self.target_network = DQN.DQN_two(25, 20)
+        self.qlearning_nn = DQN.DQN_one(256)
+        self.target_network = DQN.DQN_one(256)
         self.target_network.load_state_dict(self.qlearning_nn.state_dict())
         self.optimiser = torch.optim.Adam(self.qlearning_nn.parameters(), lr=self.eta)
         self.episode = 0
