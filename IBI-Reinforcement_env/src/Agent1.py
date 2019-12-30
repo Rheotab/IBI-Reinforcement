@@ -103,15 +103,17 @@ class Agent(object):
             self.optimiser.step()
             if self.N == self.count_N:
                 self.count_N = 0
+                print("TARGET")
                 # self.target_network = copy.deepcopy(self.qlearning_nn)
                 self.target_network.load_state_dict(self.qlearning_nn.state_dict())
 
     def show_mean_loss_ep(self):
         plt.plot(self.arr_mean_loss)
+        plt.title("Ep_Avg_LOSS")
         plt.show()
 
     def show_loss_learn(self):
         plt.plot(self.arr_loss)
+        plt.title("LOSS")
         plt.show()
 
-        # print(time.time() - start)

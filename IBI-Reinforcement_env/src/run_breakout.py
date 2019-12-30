@@ -2,9 +2,9 @@ import matplotlib.pyplot as plt
 import gym
 import random
 from gym import wrappers, logger
-from Agent1 import Agent
 import numpy as np
 import time
+from Agent_Breakout import Agent
 from atari_preprocess import AtariPreprocessing
 
 if __name__ == '__main__':
@@ -16,8 +16,7 @@ if __name__ == '__main__':
     # want to change the amount of output.
     logger.set_level(logger.INFO)
 
-    env_id = 'CartPole-v1'
-    # env_id = 'BreakoutNoFrameskip-v4'
+    env_id = 'BreakoutNoFrameskip-v4'
 
     env = gym.make(env_id)
 
@@ -25,16 +24,14 @@ if __name__ == '__main__':
     # directory, including one with existing data -- all monitor files
     # will be namespaced). You can also dump to a tempdir if you'd
     # like: tempfile.mkdtemp().
-    outdir = '/tmp/CartPole-v1'
 
-
-    # outdir = '/tmp/BreakoutNoFrameskip-v4'
+    outdir = '/tmp/BreakoutNoFrameskip-v4'
 
     def recorder(episode_id):
         return episode_id % 10 == 0
 
 
-    # env = AtariPreprocessing(env)
+    env = AtariPreprocessing(env)
     env = wrappers.Monitor(env, video_callable=recorder, directory=outdir, force=True)
     env.seed(0)
     agent = Agent(nb_ep=episode_count, action_space=env.action_space, buffer_size=20000, epsilon=0.5, batch_size=100,

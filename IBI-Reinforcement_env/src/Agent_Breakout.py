@@ -4,14 +4,14 @@ import torch.nn.functional as F
 import gym
 import random
 from gym import wrappers, logger
-from DQN import DQN
+from DQN_Breakout import Net
 from Memory import Memory
 import numpy as np
 import time
 import copy
 
 class Agent(object):
-    def __init__(self, action_space, buffer_size=10000, epsilon=0.3, batch_size=10, gamma=0.05, eta=0.005, N = 100):
+    def __init__(self,nb_ep, action_space, buffer_size=10000, epsilon=0.3, batch_size=10, gamma=0.05, eta=0.005, N = 100):
         self.action_space = action_space
         self.eps = epsilon # e-greedy
         self.batch_size = batch_size # what do we learn
@@ -20,8 +20,8 @@ class Agent(object):
         self.N = N # When do we transfer to target -> Improve stability
         self.count_N = 0
         self.memory = Memory(buffer_size)
-        self.qlearning_nn = DQN(64) # FIXME
-        self.target_network = DQN(64) # FIXME
+        self.qlearning_nn = Net(64) # FIXME
+        self.target_network = Net(64) # FIXME
         self.target_network.load_state_dict(self.qlearning_nn.state_dict())
         self.optimiser = torch.optim.Adam(self.qlearning_nn.parameters(), lr=self.eta)
         self.arr_loss = []
@@ -88,3 +88,5 @@ class Agent(object):
         plt.plot(self.arr_loss)
         plt.show()
 
+    def save_weights(self, txt):
+        torch.save(self.target_network.state_dict(), txt)
