@@ -5,6 +5,7 @@ from gym import wrappers, logger
 import numpy as np
 import time
 from Agent_Breakout import Agent
+from tqdm import tqdm
 # from atari_preprocess import AtariPreprocessing
 from preprocess import Preprocess
 
@@ -43,7 +44,7 @@ if __name__ == '__main__':
 
     results = []
 
-    for i in range(episode_count):
+    for i in tqdm(range(episode_count)):
         ob, reward, done, _ = env.reset()
         nb_iter = 0
         done = False

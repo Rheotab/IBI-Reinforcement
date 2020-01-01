@@ -32,7 +32,7 @@ class Agent(object):
         qvalues = self.qlearning_nn(torch.Tensor(observation))
         value = self.politique_greedy(qvalues)
 
-        return self.action_transform_index_into_valid(value)
+        return int(value)
 
     def action_transform_index_into_valid(self, index):
         if index == 2:
@@ -47,7 +47,7 @@ class Agent(object):
     def politique_greedy(self, qval):
         qval_np = qval.clone().detach().numpy()
         if random.random() < self.eps:
-            return random.randint(0, len(qval_np) - 1)
+            return self.action_space.sample()
         a = np.array([])
         a = np.append(a, np.argmax(qval_np))
         return np.random.choice(a)

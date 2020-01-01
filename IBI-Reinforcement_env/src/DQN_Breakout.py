@@ -15,12 +15,12 @@ class Net(torch.nn.Module):
 
 
     def forward(self, x):
-        x = F.relu(self.conv1(x))
-        #x = F.max_pool2d(x, 2)
-        x = F.relu(self.conv2(x))
-        #x = F.max_pool2d(x, 2)
-        x = x.flatten()
+        x_conv1 = F.relu(self.conv1(x))
+        # x = F.max_pool2d(x, 2)
+        x_conv2 = F.relu(self.conv2(x_conv1))
+        # x = F.max_pool2d(x, 2)
+        x_flat = x_conv2.flatten()
         # x = x.view(self.nn1.shape())
-        x = F.relu(self.nn1(x))
-        x = F.relu(self.nn2(x))
-        return x
+        x_nn1 = F.relu(self.nn1(x_flat))
+        x_nn2 = F.relu(self.nn2(x_nn1))
+        return x_nn2

@@ -79,7 +79,6 @@ class AtariPreprocessing(gym.Wrapper):
                 new_lives = self.ale.lives()
                 done = done or new_lives < self.lives
                 self.lives = new_lives
-
             if done:
                 break
             if t == self.frame_skip - 2:

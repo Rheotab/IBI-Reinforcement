@@ -1,5 +1,5 @@
 import random
-
+import torch
 
 class Memory:
     def __init__(self, buffer_size):
@@ -13,4 +13,3 @@ class Memory:
 
     def get_mini_batch(self, size):
         return random.choices(self.buffer, k=size)
-
