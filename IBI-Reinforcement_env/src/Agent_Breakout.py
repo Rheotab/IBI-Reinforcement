@@ -31,7 +31,15 @@ class Agent(object):
     def act(self, observation, reward, done):
         qvalues = self.qlearning_nn(torch.Tensor(observation))
         value = self.politique_greedy(qvalues)
-        return value
+
+        return self.action_transform_index_into_valid(value)
+
+    def action_transform_index_into_valid(self, index):
+        if index == 2:
+            return 2
+        if index == 3:
+            return 3
+        return int(index)
 
     def memorise(self, interaction):
         self.memory.add(interaction)
@@ -39,8 +47,12 @@ class Agent(object):
     def politique_greedy(self, qval):
         qval_np = qval.clone().detach().numpy()
         if random.random() < self.eps:
-            return np.where(qval_np[0] == np.random.choice(qval_np[0], size=1))[0][0]
-        return np.argmax(qval_np[0])
+            return random.randint(0, len(qval_np) - 1)
+        a = np.array([])
+        a = np.append(a, np.argmax(qval_np))
+        return np.random.choice(a)
+
+
 
     # FIXME index
     def politique_boltzmann(self, qval, tau):
@@ -56,12 +68,12 @@ class Agent(object):
             qvalues = self.qlearning_nn(state)
             action = interaction[1]
             reward = interaction[3]
-            qval_prec = qvalues[0][action]
+            qval_prec = qvalues[action]
             if interaction[4]:
                 tmp = torch.Tensor([reward]).reshape(1)
             else:
                 qvalues_next = self.target_network(state_next)
-                qmax = torch.max(qvalues_next[0])
+                qmax = torch.max(qvalues_next)
                 tmp = torch.Tensor([reward + self.gamma * qmax]).reshape(1)
             loss = F.mse_loss(qval_prec.reshape(1), tmp)
             self.arr_loss.append(loss)

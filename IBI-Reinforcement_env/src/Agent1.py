@@ -50,9 +50,9 @@ class Agent(object):
         self.memory.add(interaction)
 
     def politique_greedy(self, qval):
-        qval_np = qval.clone().detach().numpy()
+        qval_np = qval.clone().detach().numpy()[0]
         if random.random() < self.eps:
-            return np.where(qval_np[0] == np.random.choice(qval_np[0], size=1))[0][0]
+            return np.where(qval_np[0] == np.random.choice(qval_np[0], size=1))[0]
         return np.argmax(qval_np[0])
 
     # FIXME index

@@ -19,9 +19,8 @@ class Net(torch.nn.Module):
         #x = F.max_pool2d(x, 2)
         x = F.relu(self.conv2(x))
         #x = F.max_pool2d(x, 2)
-        print(x.shape)
         x = x.flatten()
-       # x = x.view(self.nn1.shape())
+        # x = x.view(self.nn1.shape())
         x = F.relu(self.nn1(x))
         x = F.relu(self.nn2(x))
         return x
