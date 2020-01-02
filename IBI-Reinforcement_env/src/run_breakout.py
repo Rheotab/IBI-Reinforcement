@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
     buffer_size = 200000
     epsilon = 0.2
-    batch_size = 64
+    batch_size = 32
     gamma = 0.95
     eta = 0.001
     N = 500
@@ -82,6 +82,7 @@ if __name__ == '__main__':
             score += reward
         print("EP " + str(i) + " - score " + str(reward))
         print("EP " + str(i) + " - itertion " + str(nb_iter))
+        print("I saw " + agent.how_many_did_u_see() + " interaction so far")
 
         results.append(nb_iter)
     env.close()

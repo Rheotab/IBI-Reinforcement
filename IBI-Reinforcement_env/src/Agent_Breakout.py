@@ -89,3 +89,7 @@ class Agent(object):
 
     def save_weights(self, txt):
         torch.save(self.target_network.state_dict(), txt)
+
+
+    def how_many_did_u_see(self):
+        return str(self.memory.count)
