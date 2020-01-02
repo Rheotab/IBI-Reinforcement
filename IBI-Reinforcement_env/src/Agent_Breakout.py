@@ -22,8 +22,8 @@ class Agent(object):
         self.N = N  # When do we transfer to target -> Improve stability
         self.count_N = 0
         self.memory = Memory(buffer_size)
-        self.qlearning_nn = Net(64)  # FIXME
-        self.target_network = Net(64)  # FIXME
+        self.qlearning_nn = Net()
+        self.target_network = Net()
         self.target_network.load_state_dict(self.qlearning_nn.state_dict())
         self.optimiser = torch.optim.Adam(self.qlearning_nn.parameters(), lr=self.eta)
         self.arr_loss = []
@@ -67,7 +67,7 @@ class Agent(object):
             qvalues = self.qlearning_nn(state)
             action = interaction[1]
             reward = interaction[3]
-            qval_prec = qvalues[action]
+            qval_prec = qvalues[0][action]
             if interaction[4]:
                 tmp = torch.Tensor([reward]).reshape(1)
             else:

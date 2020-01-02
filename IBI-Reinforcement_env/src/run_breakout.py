@@ -34,11 +34,11 @@ if __name__ == '__main__':
         #return episode_id % 1 == 0
 
 
-    buffer_size = 2000
-    epsilon = 0.5
+    buffer_size = 200000
+    epsilon = 0.2
     batch_size = 64
     gamma = 0.95
-    eta = 0.0005
+    eta = 0.001
     N = 500
 
 
@@ -69,6 +69,7 @@ if __name__ == '__main__':
         ob, reward, done, _ = env.reset()
         nb_iter = 0
         done = False
+        score = 0
         while not done:
             action = agent.act(ob, reward, done)
             prec_ob = ob
@@ -78,7 +79,10 @@ if __name__ == '__main__':
             agent.memorise(interaction)
             agent.learn()
             nb_iter += 1
-        print("EP " + str(i) + " - score " + str(nb_iter))
+            score += reward
+        print("EP " + str(i) + " - score " + str(reward))
+        print("EP " + str(i) + " - itertion " + str(nb_iter))
+
         results.append(nb_iter)
     env.close()
     plt.plot(results)
