@@ -34,12 +34,7 @@ class Agent(object):
 
         return int(value)
 
-    def action_transform_index_into_valid(self, index):
-        if index == 2:
-            return 2
-        if index == 3:
-            return 3
-        return int(index)
+
 
     def memorise(self, interaction):
         self.memory.add(interaction)
