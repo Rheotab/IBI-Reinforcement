@@ -82,8 +82,8 @@ if __name__ == '__main__':
             agent.learn()
             nb_iter += 1
             score += reward
-        print("EP " + str(i) + " - score " + str(reward))
-        print("EP " + str(i) + " - itertion " + str(nb_iter))
+        print("EP " + str(i) + " - score " + str(score))
+        print("EP " + str(i) + " - iteration " + str(nb_iter))
         print("I saw " + agent.how_many_did_u_see() + " interaction so far")
 
         results.append(nb_iter)

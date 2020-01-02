@@ -35,7 +35,7 @@ class Preprocess(gym.Wrapper):
         for t in range(self.size_wrap):
             ob, reward, done, info = self.env.step(action)
             if n_lives != self.lives:
-                R = - 1
+                done = True
             R += reward
 
             # Shape
