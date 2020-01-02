@@ -22,8 +22,8 @@ class Agent(object):
         self.N = N
         self.count_N = 0
         self.memory = Memory(buffer_size)
-        self.qlearning_nn = DQN.DQN_two(32,64)
-        self.target_network = DQN.DQN_two(32,64)
+        self.qlearning_nn = DQN.DQN_two(128,256)
+        self.target_network = DQN.DQN_two(128,256)
         self.target_network.load_state_dict(self.qlearning_nn.state_dict())
         self.optimiser = torch.optim.Adam(self.qlearning_nn.parameters(), lr=self.eta)
         self.episode = 0
@@ -50,9 +50,9 @@ class Agent(object):
         self.memory.add(interaction)
 
     def politique_greedy(self, qval):
-        qval_np = qval.clone().detach().numpy()[0]
+        qval_np = qval.clone().detach().numpy()
         if random.random() < self.eps:
-            return np.where(qval_np[0] == np.random.choice(qval_np[0], size=1))[0]
+            return np.where(qval_np[0] == np.random.choice(qval_np[0], size=1))[0][0]
         return np.argmax(qval_np[0])
 
     # FIXME index
@@ -74,8 +74,8 @@ class Agent(object):
     def learn(self):
         minibatch = self.memory.get_mini_batch(self.batch_size)
         start = time.time()
+        self.count_N += 1
         for interaction in minibatch:
-            self.count_N += 1
             state = torch.Tensor(interaction[0]).reshape(1, 4)
             state_next = torch.Tensor(interaction[2]).reshape(1, 4)
             qvalues = self.qlearning_nn(state)
@@ -101,11 +101,11 @@ class Agent(object):
             self.optimiser.zero_grad()
             loss.backward()
             self.optimiser.step()
-            if self.N == self.count_N:
-                self.count_N = 0
-                print("TARGET")
-                # self.target_network = copy.deepcopy(self.qlearning_nn)
-                self.target_network.load_state_dict(self.qlearning_nn.state_dict())
+        if self.N == self.count_N:
+            self.count_N = 0
+            print("TARGET")
+            # self.target_network = copy.deepcopy(self.qlearning_nn)
+            self.target_network.load_state_dict(self.qlearning_nn.state_dict())
 
     def show_mean_loss_ep(self):
         plt.plot(self.arr_mean_loss)
