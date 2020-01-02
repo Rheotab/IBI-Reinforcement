@@ -22,6 +22,7 @@ class Preprocess(gym.Wrapper):
         self.screen_size = screen_size
         self.ale = env.unwrapped.ale
         self.noop_max = noop_max
+        self.lives = self.ale.lives()
         # pd = self.env.unwrapped.get_action_meanings()
         # print("iuha")
 
@@ -29,9 +30,14 @@ class Preprocess(gym.Wrapper):
         R = 0.0
         res = None
         done = False
+
+        n_lives = self.ale.lives()
         for t in range(self.size_wrap):
             ob, reward, done, info = self.env.step(action)
+            if n_lives != self.lives:
+                R = - 1
             R += reward
+
             # Shape
             ob = cv2.resize(ob, (self.screen_size, self.screen_size), interpolation=cv2.INTER_AREA)
             # Max R,G,B
@@ -42,6 +48,7 @@ class Preprocess(gym.Wrapper):
                 res = np.append(res, [ob], axis=0)
             if done:
                 break
+        self.lives = n_lives
         i, _, _ = res.shape
         if done and i != self.skip_frame:
             for k in range(i - 1, self.skip_frame - 1):

@@ -11,6 +11,12 @@ import time
 import copy
 
 
+''''
+TODO : 
+Dire a l'agent (modifier la reward) lorsqu'il perd une vie 
+
+'''
+
 class Agent(object):
     def __init__(self, nb_ep, action_space, buffer_size=100000, epsilon=0.1, batch_size=50, gamma=0.8, eta=0.005,
                  N=100):
