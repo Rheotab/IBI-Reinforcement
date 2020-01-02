@@ -33,14 +33,35 @@ if __name__ == '__main__':
         return True
         #return episode_id % 1 == 0
 
+
+    buffer_size = 2000
+    epsilon = 0.5
+    batch_size = 64
+    gamma = 0.95
+    eta = 0.0005
+    N = 500
+
+
     env = wrappers.Monitor(env, video_callable=recorder, directory=outdir, force=True)
     env = Preprocess(env)
     env.seed(0)
-    agent = Agent(nb_ep=episode_count, action_space=env.action_space, buffer_size=2000, epsilon=0.5, batch_size=64,
-                  gamma=0.8, eta=0.0005, N=500)
+    agent = Agent(nb_ep=episode_count, action_space=env.action_space, buffer_size=buffer_size, epsilon=epsilon, batch_size=batch_size,
+                  gamma=gamma, eta=eta, N=N)
+
 
     reward = 0
     done = False
+    debug = True
+    if debug:
+        print("NB EP : " + str(episode_count))
+        print("Action Space : " + str(env.action_space))
+        print("Meanings : " + str(env.get_action_meanings()))
+        print("BUFFER SIZE : " + str(buffer_size))
+        print("EPSILON : " + str(epsilon))
+        print("Batch_size : " + str(batch_size))
+        print("Gamma : " + str(gamma))
+        print("LR : " + str(eta))
+        print("update target net : " + str(N))
 
     results = []
 

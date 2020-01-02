@@ -52,7 +52,7 @@ class Agent(object):
     def politique_greedy(self, qval):
         qval_np = qval.clone().detach().numpy()[0]
         if random.random() < self.eps:
-            return np.where(qval_np[0] == np.random.choice(qval_np[0], size=1))[0]
+            return random.randint(0, len(qval_np) - 2)
         return np.argmax(qval_np[0])
 
     # FIXME index
