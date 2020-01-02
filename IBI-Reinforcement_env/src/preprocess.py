@@ -14,11 +14,12 @@ TODO :
 
 class Preprocess(gym.Wrapper):
 
-    def __init__(self, env, noop_max=30, size_wrap=4, skip_frame=4, screen_size=84, norm=False):
+    def __init__(self, env,train, noop_max=30, size_wrap=4, skip_frame=4, screen_size=84, norm=False):
         super(Preprocess, self).__init__(env)
-        self.size_wrap = 4
-        self.skip_frame = 4
+        self.size_wrap = size_wrap
+        self.skip_frame = skip_frame
         self.norm = norm
+        self.train = train
         self.screen_size = screen_size
         self.ale = env.unwrapped.ale
         self.noop_max = noop_max
@@ -34,7 +35,7 @@ class Preprocess(gym.Wrapper):
         n_lives = self.ale.lives()
         for t in range(self.size_wrap):
             ob, reward, done, info = self.env.step(action)
-            if n_lives != self.lives:
+            if n_lives != self.lives and self.train:
                 done = True
             R += reward
 
@@ -63,4 +64,4 @@ class Preprocess(gym.Wrapper):
 
     def reset(self, **kwargs):  # NoopReset
         self.env.reset(**kwargs)
-        return self.step(0)  ## FIXME WE HAVE TO MAKE SURE THIS IS NOOP
+        return self.step(0)  ## 0 is noop

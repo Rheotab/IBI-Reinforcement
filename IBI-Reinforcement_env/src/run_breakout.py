@@ -20,7 +20,8 @@ if __name__ == '__main__':
 
     env_id = 'BreakoutNoFrameskip-v4'
 
-    env = gym.make(env_id)
+    env_test = gym.make(env_id)
+    env_train = gym.make(env_id)
 
     # You provide the directory to write to (can be an existing
     # directory, including one with existing data -- all monitor files
@@ -29,9 +30,10 @@ if __name__ == '__main__':
 
     outdir = '/tmp/BreakoutNoFrameskip-v4'
 
+
     def recorder(episode_id):
         return True
-        #return episode_id % 1 == 0
+        # return episode_id % 1 == 0
 
 
     buffer_size = 200000
@@ -41,21 +43,23 @@ if __name__ == '__main__':
     eta = 0.001
     N = 500
 
+    env_test = wrappers.Monitor(env_test, video_callable=recorder, directory=outdir, force=True)
+    env_test = Preprocess(env_test, train=False)
 
-    env = wrappers.Monitor(env, video_callable=recorder, directory=outdir, force=True)
-    env = Preprocess(env)
-    env.seed(0)
-    agent = Agent(nb_ep=episode_count, action_space=env.action_space, buffer_size=buffer_size, epsilon=epsilon, batch_size=batch_size,
+    env_train = Preprocess(env_train, train=True)
+    env_train.seed(0)
+    env_test.seed(0)
+    agent = Agent(nb_ep=episode_count, action_space=env_train.action_space, buffer_size=buffer_size, epsilon=epsilon,
+                  batch_size=batch_size,
                   gamma=gamma, eta=eta, N=N)
-
 
     reward = 0
     done = False
     debug = True
     if debug:
         print("NB EP : " + str(episode_count))
-        print("Action Space : " + str(env.action_space))
-        print("Meanings : " + str(env.get_action_meanings()))
+        print("Action Space : " + str(env_train.action_space))
+        print("Meanings : " + str(env_train.get_action_meanings()))
         print("BUFFER SIZE : " + str(buffer_size))
         print("EPSILON : " + str(epsilon))
         print("Batch_size : " + str(batch_size))
@@ -66,14 +70,14 @@ if __name__ == '__main__':
     results = []
 
     for i in tqdm(range(episode_count)):
-        ob, reward, done, _ = env.reset()
+        ob, reward, done, _ = env_train.reset()
         nb_iter = 0
         done = False
         score = 0
         while not done:
             action = agent.act(ob, reward, done)
             prec_ob = ob
-            ob, reward, done, _ = env.step(action)
+            ob, reward, done, _ = env_train.step(action)
             if int(reward) != 0:
                 print(str(reward))
             interaction = (prec_ob, action, ob, reward, done)
@@ -82,12 +86,32 @@ if __name__ == '__main__':
             agent.learn()
             nb_iter += 1
             score += reward
+        print("TRAIN")
         print("EP " + str(i) + " - score " + str(score))
         print("EP " + str(i) + " - iteration " + str(nb_iter))
         print("I saw " + agent.how_many_did_u_see() + " interaction so far")
-
+        done = False
+        score = 0
+        nb_iter = 0
+        if i % 4 == 0:
+            ob, reward, done, _ = env_test.reset()
+            while not done:
+                action = agent.act(ob, reward, done)
+                prec_ob = ob
+                ob, reward, done, _ = env_test.step(action)
+                interaction = (prec_ob, action, ob, reward, done)
+                # print(interaction)
+                agent.memorise(interaction)
+                # agent.learn()
+                nb_iter += 1
+                score += reward
+            print("TEST")
+            print("EP " + str(i) + " - score " + str(score))
+            print("EP " + str(i) + " - iteration " + str(nb_iter))
+            print("I saw " + agent.how_many_did_u_see() + " interaction so far")
         results.append(nb_iter)
-    env.close()
+    env_train.close()
+    env_test.close()
     plt.plot(results)
     plt.ylabel('number of iterations')
     plt.xlabel('score')
