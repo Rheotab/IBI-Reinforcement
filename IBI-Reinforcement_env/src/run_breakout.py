@@ -30,11 +30,11 @@ if __name__ == '__main__':
     outdir = '/tmp/BreakoutNoFrameskip-v4'
 
     def recorder(episode_id):
-        return episode_id % 10 == 0
+        return True
+        #return episode_id % 1 == 0
 
-
-    env = Preprocess(env)
     env = wrappers.Monitor(env, video_callable=recorder, directory=outdir, force=True)
+    env = Preprocess(env)
     env.seed(0)
     agent = Agent(nb_ep=episode_count, action_space=env.action_space, buffer_size=2000, epsilon=0.5, batch_size=64,
                   gamma=0.8, eta=0.0005, N=500)
@@ -60,9 +60,9 @@ if __name__ == '__main__':
         print("EP " + str(i) + " - score " + str(nb_iter))
         results.append(nb_iter)
     env.close()
-    agent.show_mean_loss_ep()
     plt.plot(results)
     plt.ylabel('number of iterations')
+    plt.xlabel('score')
     plt.show()
     # Note there's no env.render() here. But the environment still can open window and
     # render if asked by env.monitor: it calls env.render('rgb_array') to record video.

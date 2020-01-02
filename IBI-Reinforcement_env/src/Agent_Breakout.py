@@ -12,7 +12,7 @@ import copy
 
 
 class Agent(object):
-    def __init__(self, nb_ep, action_space, buffer_size=10000, epsilon=0.3, batch_size=10, gamma=0.05, eta=0.005,
+    def __init__(self, nb_ep, action_space, buffer_size=100000, epsilon=0.1, batch_size=50, gamma=0.8, eta=0.005,
                  N=100):
         self.action_space = action_space
         self.eps = epsilon  # e-greedy
@@ -51,7 +51,6 @@ class Agent(object):
         a = np.array([])
         a = np.append(a, np.argmax(qval_np))
         return np.random.choice(a)
-
 
 
     # FIXME index

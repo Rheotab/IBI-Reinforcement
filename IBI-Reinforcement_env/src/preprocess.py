@@ -43,15 +43,15 @@ class Preprocess(gym.Wrapper):
             if done:
                 break
         i, _, _ = res.shape
-        if done and i != 4:
-            for k in range(4 - i):
-                res = np.append(res, [res[4 - k]], axis=0)
+        if done and i != self.skip_frame:
+            for k in range(i - 1, self.skip_frame - 1):
+                res = np.append(res, [res[k]], axis=0)
         np.maximum(res[self.size_wrap - 2], res[self.size_wrap - 1], out=res[self.size_wrap - 1])
         if self.norm:
             res = np.asarray(res, dtype=np.float32) / 255.0
         else:
             res = np.asarray(res, dtype=np.uint8)
-        res = res.reshape(1, 4, 84, 84)
+        res = res.reshape((1, 4, 84, 84))
         return res, R, done, None
 
     def reset(self, **kwargs):  # NoopReset
