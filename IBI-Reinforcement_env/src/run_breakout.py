@@ -78,8 +78,6 @@ if __name__ == '__main__':
             action = agent.act(ob, reward, done)
             prec_ob = ob
             ob, reward, done, _ = env_train.step(action)
-            if int(reward) != 0:
-                print(str(reward))
             interaction = (prec_ob, action, ob, reward, done)
             # print(interaction)
             agent.memorise(interaction)
