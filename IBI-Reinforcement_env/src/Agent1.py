@@ -63,7 +63,10 @@ class Agent(object):
 
     def politique_greedy(self, qval):
         qval_np = qval.clone().detach().numpy()
-        a = np.argmax(qval_np[0])
+        if qval_np[0][0] == qval_np[0][1]:
+            a = random.randint(0, len(qval_np[0]) - 1)
+        else:
+            a = np.argmax(qval_np[0])
         if int(a) == 0:
             self.arr_max_q_val_z["arr"].append(qval_np[0][a])
             self.arr_max_q_val_z["step"].append(self.step)
