@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 import copy
 
-
+'''
 class Net(torch.nn.Module):
     def __init__(self, D_out=4):
         super(Net, self).__init__()
@@ -19,7 +19,7 @@ class Net(torch.nn.Module):
         x_nn2 = F.relu(self.nn2(x_nn1))
         return x_nn2
 
-
+'''
 '''
 
 THIS IS NETWORK WE HAVE TO USE AND TRAIN AT LEAST ONCE. 
@@ -27,7 +27,7 @@ THIS IS NETWORK WE HAVE TO USE AND TRAIN AT LEAST ONCE.
 
 TODO : SAVE WEIGHTS IN FILE. 
 
-
+'''
 class Net(torch.nn.Module):
     def __init__(self, D_out=4):
         super(Net, self).__init__()
@@ -51,4 +51,4 @@ class Net(torch.nn.Module):
         x_nn1 = F.relu(self.nn1(x_conv3.view(x_conv3.size(0), -1)))
         x_nn2 = F.relu(self.nn2(x_nn1))
         return x_nn2
-'''
+
