@@ -41,9 +41,9 @@ if __name__ == '__main__':
     batch_size = 32
     gamma = 0.95
     eta = 0.00025
-    N = 500
+    N = 10000
     populate = True
-    nb_pop = 50000
+    nb_pop = 20000
 
     debug = True
 
@@ -85,6 +85,7 @@ if __name__ == '__main__':
                 ob, reward, done, _ = env_pop.step(action)
                 interaction = (prec_ob, action, ob, reward, done)
                 agent.memorise(interaction)
+            agent.reset_noop()
 
     for i in tqdm(range(episode_count)):
         ob, reward, done, _ = env_train.reset()
@@ -101,6 +102,7 @@ if __name__ == '__main__':
             agent.learn()
             nb_iter += 1
             score += reward
+        agent.reset_noop()
         print("TRAIN")
         print("EP " + str(i) + " - score " + str(score))
         print("EP " + str(i) + " - iteration " + str(nb_iter))
@@ -121,6 +123,7 @@ if __name__ == '__main__':
                 # agent.learn()
                 nb_iter += 1
                 score += reward
+            agent.reset_noop()
             print("TEST")
             print("EP " + str(i) + " - score " + str(score))
             print("EP " + str(i) + " - iteration " + str(nb_iter))

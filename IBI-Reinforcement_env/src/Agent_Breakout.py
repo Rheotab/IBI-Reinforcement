@@ -34,6 +34,7 @@ class Agent(object):
         self.optimiser = torch.optim.RMSprop(self.qlearning_nn.parameters(), lr=self.eta, momentum=0.95, eps=1e-2)
         self.arr_loss = []
         self.count_no_op = 0
+        self.no_op_max = 30
 
     def act(self, observation, reward, done):
         qvalues = self.qlearning_nn(torch.Tensor(observation))
@@ -42,7 +43,8 @@ class Agent(object):
             self.count_no_op += 1
         return value
 
-
+    def reset_noop(self):
+        self.count_no_op = 0
 
     def memorise(self, interaction):
         self.memory.add(interaction)
@@ -51,11 +53,14 @@ class Agent(object):
         qval_np = qval.clone().detach().numpy()
         if random.random() < self.eps:
             v = int(self.action_space.sample())
-            while v == 0:
+            while self.count_no_op > self.no_op_max and v == 0:
                 v = int(self.action_space.sample())
             return v
         a = np.argwhere(qval_np[0] == np.amax(qval_np[0])).flatten()
         k = np.random.choice(a)
+        if self.count_no_op > self.no_op_max and int(k) == 0:
+            a = np.argwhere(qval_np[0][1:] == np.amax(qval_np[0][1:])).flatten()
+            k = np.random.choice(a) + 1
         return k
 
     def random_act(self):
@@ -67,9 +72,9 @@ class Agent(object):
         pass
 
     def learn(self):
-        self.count_N += 1
         minibatch = self.memory.get_mini_batch(self.batch_size)
         for interaction in minibatch:
+            self.count_N += 1
             state = torch.Tensor(interaction[0])
             state_next = torch.Tensor(interaction[2])
             qvalues = self.qlearning_nn(state)
@@ -87,9 +92,9 @@ class Agent(object):
             self.optimiser.zero_grad()
             loss.backward()
             self.optimiser.step()
-        if self.N == self.count_N:
-            self.count_N = 0
-            self.target_network.load_state_dict(self.qlearning_nn.state_dict())
+            if self.N == self.count_N:
+                self.count_N = 0
+                self.target_network.load_state_dict(self.qlearning_nn.state_dict())
 
     def show_loss(self):
         plt.plot(self.arr_loss)
