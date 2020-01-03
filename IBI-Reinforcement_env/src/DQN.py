@@ -8,8 +8,8 @@ class DQN_one(torch.nn.Module):
         super(DQN_one, self).__init__()
         self.nn1 = torch.nn.Linear(4, D_H)
         self.nn2 = torch.nn.Linear(D_H, D_out)
-        torch.nn.init.xavier_uniform_(self.nn1.weight)
-        torch.nn.init.xavier_uniform_(self.nn2.weight)
+        torch.nn.init.xavier_uniform_(self.nn1.weight, gain=torch.nn.init.calculate_gain('relu'))
+        torch.nn.init.xavier_uniform_(self.nn2.weight, gain=torch.nn.init.calculate_gain('relu'))
         self.D_H1 = D_H
         self.D_out = D_out
 
@@ -25,9 +25,9 @@ class DQN_two(torch.nn.Module):
         self.nn1 = torch.nn.Linear(4, D_H1)
         self.nn2 = torch.nn.Linear(D_H1, D_H2)
         self.nn3 = torch.nn.Linear(D_H2, D_out)
-        torch.nn.init.xavier_uniform_(self.nn1.weight)
-        torch.nn.init.xavier_uniform_(self.nn2.weight)
-        torch.nn.init.xavier_uniform_(self.nn3.weight)
+        torch.nn.init.xavier_uniform_(self.nn1.weight, gain=torch.nn.init.calculate_gain('relu'))
+        torch.nn.init.xavier_uniform_(self.nn2.weight, gain=torch.nn.init.calculate_gain('relu'))
+        torch.nn.init.xavier_uniform_(self.nn3.weight, gain=torch.nn.init.calculate_gain('relu'))
         self.D_H1 = D_H1
         self.D_H2 = D_H2
         self.D_out = D_out

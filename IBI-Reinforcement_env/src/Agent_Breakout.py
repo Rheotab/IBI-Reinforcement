@@ -11,12 +11,6 @@ import time
 import copy
 
 
-''''
-TODO : 
-Dire a l'agent (modifier la reward) lorsqu'il perd une vie 
-
-'''
-
 class Agent(object):
     def __init__(self, nb_ep, action_space, buffer_size=100000, epsilon=0.1, batch_size=50, gamma=0.8, eta=0.005,
                  N=100):
@@ -51,6 +45,7 @@ class Agent(object):
 
     def politique_greedy(self, qval):
         qval_np = qval.clone().detach().numpy()
+       # print(qval_np)
         if random.random() < self.eps:
             v = int(self.action_space.sample())
             while self.count_no_op > self.no_op_max and v == 0:
@@ -87,7 +82,11 @@ class Agent(object):
                 qvalues_next = self.target_network(state_next)
                 qmax = torch.max(qvalues_next)
                 tmp = torch.Tensor([reward + self.gamma * qmax]).reshape(1)
+          #  print("hzidezdeizn")
+          #  print(qval_prec)
+          #  print(tmp)
             loss = F.mse_loss(qval_prec.reshape(1), tmp)
+           # print(loss)
             self.arr_loss.append(loss)
             self.optimiser.zero_grad()
             loss.backward()

@@ -42,7 +42,7 @@ if __name__ == '__main__':
     gamma = 0.95
     eta = 0.00025
     N = 10000
-    populate = True
+    populate = False
     nb_pop = 20000
 
     debug = True
