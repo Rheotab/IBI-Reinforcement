@@ -58,6 +58,8 @@ class Agent(object):
         k = np.random.choice(a)
         return k
 
+    def random_act(self):
+        return int(self.action_space.sample())
 
     # FIXME index
     def politique_boltzmann(self, qval, tau):

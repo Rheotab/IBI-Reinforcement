@@ -56,6 +56,8 @@ if __name__ == '__main__':
     reward = 0
     done = False
     debug = True
+    populate = False
+    nb_pop = 50000
     if debug:
         print("NB EP : " + str(episode_count))
         print("Action Space : " + str(env_train.action_space))
@@ -68,6 +70,18 @@ if __name__ == '__main__':
         print("update target net : " + str(N))
 
     results = []
+    if populate:
+        env_pop = gym.make(env_id)
+        env_pop = Preprocess(env_pop, train=True)
+        for i in tqdm(range(nb_pop)):
+            done = False
+            ob, reward, done, _ = env_pop.reset()
+            while not done:
+                action = agent.random_act()
+                prec_ob = ob
+                ob, reward, done, _ = env_pop.step(action)
+                interaction = (prec_ob, action, ob, reward, done)
+                agent.memorise(interaction)
 
     for i in tqdm(range(episode_count)):
         ob, reward, done, _ = env_train.reset()
