@@ -34,9 +34,18 @@ class Agent(object):
             "count": 0,
             "value": 0
         }
-        self.arr_max_q_val = []
+        self.arr_max_q_val_z = {
+            "arr": [],
+            "step": []
+        }
+        self.arr_max_q_val_o = {
+            "arr": [],
+            "step": []
+        }
+        self.step = 0
 
     def act(self, observation, reward, done):
+        self.step += 1
         qvalues = self.qlearning_nn(torch.Tensor(observation).reshape(1, 4))
         value = self.politique_greedy(qvalues)
         return value
@@ -46,17 +55,23 @@ class Agent(object):
 
     def memorise(self, interaction):
         if interaction[4]:
-            self.episode += 1
             self.set_epsilon()
         self.memory.add(interaction)
+
+    def set_ep(self):
+        self.episode += 1
 
     def politique_greedy(self, qval):
         qval_np = qval.clone().detach().numpy()
         a = np.argmax(qval_np[0])
-        self.arr_max_q_val.append(qval_np[0][a])
+        if int(a) == 0:
+            self.arr_max_q_val_z["arr"].append(qval_np[0][a])
+            self.arr_max_q_val_z["step"].append(self.step)
+        if int(a) == 1:
+            self.arr_max_q_val_o["arr"].append(qval_np[0][a])
+            self.arr_max_q_val_o["step"].append(self.step)
         if random.random() < self.eps:
             return random.randint(0, len(qval_np[0]) - 1)
-        print(qval_np[0])
         return a
 
     # FIXME index
@@ -77,7 +92,6 @@ class Agent(object):
 
     def learn(self):
         minibatch = self.memory.get_mini_batch(self.batch_size)
-        start = time.time()
         for interaction in minibatch:
             self.count_N += 1
             state = torch.Tensor(interaction[0]).reshape(1, 4)
@@ -119,5 +133,15 @@ class Agent(object):
     def show_loss_learn(self):
         plt.plot(self.arr_loss)
         plt.title("LOSS")
+        plt.ylabel("loss")
+        plt.xlabel("step")
         plt.show()
 
+    def show_max_val(self):
+        plt.scatter(self.arr_max_q_val_o['step'], self.arr_max_q_val_o['arr'], label='Scatter Ones', color='r')
+        plt.scatter(self.arr_max_q_val_z['step'],self.arr_max_q_val_z['arr'], label='Scatter Zeros', color='blue')
+        plt.xlabel('Iteration')
+        plt.ylabel('max Q value')
+        plt.title('Q value progress')
+        plt.legend()
+        plt.show()

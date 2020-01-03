@@ -9,7 +9,7 @@ import time
 if __name__ == '__main__':
 
     # HYPERPARAMETERS
-    episode_count = 500
+    episode_count = 100
 
     # You can set the level to logger.DEBUG or logger.WARN if you
     # want to change the amount of output.
@@ -36,7 +36,7 @@ if __name__ == '__main__':
     # env = AtariPreprocessing(env)
     env = wrappers.Monitor(env, video_callable=recorder, directory=outdir, force=True)
     env.seed(0)
-    agent = Agent(nb_ep=episode_count, action_space=env.action_space, buffer_size=1500, epsilon=0.5, batch_size=32,
+    agent = Agent(nb_ep=episode_count, action_space=env.action_space, buffer_size=1500, epsilon=0.2, batch_size=32,
                   gamma=1, eta=0.001, N=700)
 
     reward = 0
@@ -57,11 +57,15 @@ if __name__ == '__main__':
             agent.memorise(interaction)
             agent.learn()
             nb_iter += 1
+        agent.set_ep()
         print("EP " + str(i) + " - score " + str(nb_iter))
         results.append(nb_iter)
-    agent.show_mean_loss_ep()
+    agent.show_loss_learn()
+    agent.show_max_val()
     plt.plot(results)
-    plt.ylabel('number of iterations')
+    plt.xlabel('number of iterations')
+    plt.ylabel("score")
+    plt.title("Score")
     plt.show()
     # Note there's no env.render() here. But the environment still can open window and
     # render if asked by env.monitor: it calls env.render('rgb_array') to record video.
