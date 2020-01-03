@@ -31,14 +31,16 @@ class Agent(object):
         self.qlearning_nn = Net()
         self.target_network = Net()
         self.target_network.load_state_dict(self.qlearning_nn.state_dict())
-        self.optimiser = torch.optim.RMSprop(self.qlearning_nn.parameters(), lr=self.eta)
+        self.optimiser = torch.optim.RMSprop(self.qlearning_nn.parameters(), lr=self.eta, momentum= 0.95, )
         self.arr_loss = []
+        self.count_no_op = 0
 
     def act(self, observation, reward, done):
         qvalues = self.qlearning_nn(torch.Tensor(observation))
-        value = self.politique_greedy(qvalues)
-
-        return int(value)
+        value = int(self.politique_greedy(qvalues))
+        if value == 0:
+            self.count_no_op += 1
+        return value
 
 
 
@@ -48,11 +50,16 @@ class Agent(object):
     def politique_greedy(self, qval):
         qval_np = qval.clone().detach().numpy()
         if random.random() < self.eps:
-            return self.action_space.sample()
-        a = np.array([])
-        a = np.append(a, np.argmax(qval_np))
-        return np.random.choice(a)
+            v = int(self.action_space.sample())
+            while v == 0:
+                v = int(self.action_space.sample())
+            return v
+        a = np.argwhere(qval_np[0] == np.amax(qval_np[0])).flatten()
+        k = np.random.choice(a)
+        return k
 
+    def random_act(self):
+        return int(self.action_space.sample())
 
     # FIXME index
     def politique_boltzmann(self, qval, tau):
