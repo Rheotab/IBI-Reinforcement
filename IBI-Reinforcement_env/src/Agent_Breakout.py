@@ -29,8 +29,16 @@ class Agent(object):
         self.arr_loss = []
         self.count_no_op = 0
         self.no_op_max = 30
+        self.arr_q_value = []
+        for i in range(4):
+            self.arr_q_value.append({
+                "step": [],
+                "Q": []
+            })
+        self.step = 0
 
     def act(self, observation, reward, done):
+        self.step += 1
         qvalues = self.qlearning_nn(torch.Tensor(observation))
         value = int(self.politique_greedy(qvalues))
         if value == 0:
@@ -45,7 +53,10 @@ class Agent(object):
 
     def politique_greedy(self, qval):
         qval_np = qval.clone().detach().numpy()
-       # print(qval_np)
+        # print(qval_np)
+        index = int(np.argmax(qval_np))
+        self.arr_q_value[index]["step"].append(self.step)
+        self.arr_q_value[index]["Q"].append(np.max(qval_np))
         if random.random() < self.eps:
             v = int(self.action_space.sample())
             while self.count_no_op > self.no_op_max and v == 0:
@@ -82,29 +93,35 @@ class Agent(object):
                 qvalues_next = self.target_network(state_next)
                 qmax = torch.max(qvalues_next)
                 tmp = torch.Tensor([reward + self.gamma * qmax]).reshape(1)
-          #  print("hzidezdeizn")
-          #  print(qval_prec)
-          #  print(tmp)
             loss = F.mse_loss(qval_prec.reshape(1), tmp)
-           # print(loss)
             self.arr_loss.append(loss)
             self.optimiser.zero_grad()
             loss.backward()
             self.optimiser.step()
             if self.N == self.count_N:
                 self.count_N = 0
+                print("TARGET")
                 self.target_network.load_state_dict(self.qlearning_nn.state_dict())
 
     def show_loss(self):
         plt.plot(self.arr_loss)
+        plt.xlabel("Learn step")
+        plt.ylabel("LOSS")
         plt.show()
 
-    def save_weights(self, txt):
-        torch.save(self.target_network.state_dict(), txt)
-
+    def show_q_values(self):
+        colors = ['red', 'blue', 'yellow', 'green']
+        for i in range(4):
+            plt.scatter(self.arr_q_value[i]["Q"],self.arr_q_value[i]["step"],s=0.5, label="Action : " + str(i),
+                        color=colors[i])
+        plt.xlabel('Iteration')
+        plt.ylabel('max Q value')
+        plt.title('Q value progress')
+        plt.legend()
+        plt.show()
 
     def how_many_did_u_see(self):
         return str(self.memory.count)
 
-    def save_model(self,path='/tmp/model_breakout'):
-        torch.save(self.qlearning_nn.state_dict(), path + '.pth' )
+    def save_model(self, path='/tmp/model_breakout'):
+        torch.save(self.qlearning_nn.state_dict(), path + '.pth')

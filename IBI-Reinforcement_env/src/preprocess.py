@@ -1,7 +1,7 @@
 import gym
 import numpy as np
 import cv2
-
+import matplotlib.pyplot as plt
 '''
 Inspired by
 https://github.com/openai/gym/blob/master/gym/wrappers/atari_preprocessing.py
@@ -38,11 +38,10 @@ class Preprocess(gym.Wrapper):
             if n_lives != self.lives and self.train:
                 done = True
             R += reward
-
-            # Shape
-            ob = cv2.resize(ob, (self.screen_size, self.screen_size), interpolation=cv2.INTER_AREA)
             # Max R,G,B
             ob = np.max(ob, axis=2)
+            # Shape
+            ob = cv2.resize(ob, (self.screen_size, self.screen_size))
             if res is None:
                 res = np.array([ob])
             else:

@@ -15,3 +15,10 @@ class Memory:
 
     def get_mini_batch(self, size):
         return random.choices(self.buffer, k=size)
+
+    def get_mini_batch_dim(self, size):
+        rewards = []
+        done = []
+        states = []
+        next = []
+        # todo

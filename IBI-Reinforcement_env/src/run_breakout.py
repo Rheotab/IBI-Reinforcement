@@ -12,7 +12,7 @@ from preprocess import Preprocess
 if __name__ == '__main__':
 
     # HYPERPARAMETERS
-    episode_count = 100
+    episode_count = 5
 
     # You can set the level to logger.DEBUG or logger.WARN if you
     # want to change the amount of output.
@@ -42,8 +42,8 @@ if __name__ == '__main__':
     gamma = 0.95
     eta = 0.00025
     N = 10000
-    populate = False
-    nb_pop = 20000
+    populate = True
+    nb_pop = 200
 
     debug = True
 
@@ -129,6 +129,8 @@ if __name__ == '__main__':
             print("EP " + str(i) + " - iteration " + str(nb_iter))
             print("I saw " + agent.how_many_did_u_see() + " interaction so far")
         results_test.append(score)
+    agent.show_loss()
+    agent.show_q_values()
     env_train.close()
     env_test.close()
     #agent.save_model()
