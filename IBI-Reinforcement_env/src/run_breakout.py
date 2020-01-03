@@ -12,7 +12,7 @@ from preprocess import Preprocess
 if __name__ == '__main__':
 
     # HYPERPARAMETERS
-    episode_count = 500
+    episode_count = 100
 
     # You can set the level to logger.DEBUG or logger.WARN if you
     # want to change the amount of output.
@@ -40,8 +40,12 @@ if __name__ == '__main__':
     epsilon = 0.2
     batch_size = 32
     gamma = 0.95
-    eta = 0.001
+    eta = 0.00025
     N = 500
+    populate = True
+    nb_pop = 50000
+
+    debug = True
 
     env_test = wrappers.Monitor(env_test, video_callable=recorder, directory=outdir, force=True)
     env_test = Preprocess(env_test, train=False)
@@ -55,9 +59,7 @@ if __name__ == '__main__':
 
     reward = 0
     done = False
-    debug = True
-    populate = False
-    nb_pop = 50000
+
     if debug:
         print("NB EP : " + str(episode_count))
         print("Action Space : " + str(env_train.action_space))
@@ -69,7 +71,8 @@ if __name__ == '__main__':
         print("LR : " + str(eta))
         print("update target net : " + str(N))
 
-    results = []
+    results_train = []
+    results_test = []
     if populate:
         env_pop = gym.make(env_id)
         env_pop = Preprocess(env_pop, train=True)
@@ -105,6 +108,7 @@ if __name__ == '__main__':
         done = False
         score = 0
         nb_iter = 0
+        results_train.append(score)
         if i % 4 == 0:
             ob, reward, done, _ = env_test.reset()
             while not done:
@@ -121,13 +125,11 @@ if __name__ == '__main__':
             print("EP " + str(i) + " - score " + str(score))
             print("EP " + str(i) + " - iteration " + str(nb_iter))
             print("I saw " + agent.how_many_did_u_see() + " interaction so far")
-        results.append(nb_iter)
+        results_test.append(score)
     env_train.close()
     env_test.close()
-    plt.plot(results)
-    plt.ylabel('number of iterations')
-    plt.xlabel('score')
-    plt.show()
+    #agent.save_model()
+
     # Note there's no env.render() here. But the environment still can open window and
     # render if asked by env.monitor: it calls env.render('rgb_array') to record video.
     # Video is not recorded every episode, see capped_cubic_video_schedule for details.

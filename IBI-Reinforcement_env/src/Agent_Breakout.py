@@ -31,7 +31,7 @@ class Agent(object):
         self.qlearning_nn = Net()
         self.target_network = Net()
         self.target_network.load_state_dict(self.qlearning_nn.state_dict())
-        self.optimiser = torch.optim.RMSprop(self.qlearning_nn.parameters(), lr=self.eta, momentum= 0.95, )
+        self.optimiser = torch.optim.RMSprop(self.qlearning_nn.parameters(), lr=self.eta, momentum=0.95, eps=1e-2)
         self.arr_loss = []
         self.count_no_op = 0
 
@@ -101,3 +101,6 @@ class Agent(object):
 
     def how_many_did_u_see(self):
         return str(self.memory.count)
+
+    def save_model(self,path='/tmp/model_breakout'):
+        torch.save(self.qlearning_nn.state_dict(), path + '.pth' )

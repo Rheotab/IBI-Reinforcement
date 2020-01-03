@@ -34,8 +34,13 @@ class Net(torch.nn.Module):
         self.conv1 = torch.nn.Conv2d(4, 32, kernel_size=8, stride=4)
         self.conv2 = torch.nn.Conv2d(32, 64, kernel_size=4, stride=2)
         self.conv3 = torch.nn.Conv2d(64, 64, kernel_size=3, stride=1)
+        torch.nn.init.uniform(self.conv1.weight)
+        torch.nn.init.uniform(self.conv2.weight)
+        torch.nn.init.uniform(self.conv3.weight)
         self.nn1 = torch.nn.Linear(49 * 64, 512)
         self.nn2 = torch.nn.Linear(512, D_out)
+        torch.nn.init.uniform(self.nn1.weight)
+        torch.nn.init.uniform(self.nn2.weight)
         self.D_out = D_out
 
 
