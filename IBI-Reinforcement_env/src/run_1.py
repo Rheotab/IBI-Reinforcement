@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 import gym
 import random
 from gym import wrappers, logger
@@ -44,6 +45,20 @@ if __name__ == '__main__':
 
     results = []
 
+
+    def update(i):
+        xs = [j for j in range(len(results))]
+        ax1.clear()
+
+        ax1.plot(xs, results)
+
+
+    fig = plt.figure()
+    ax1 = fig.add_subplot(1,1,1)
+
+    ani = animation.FuncAnimation(fig, update, interval=100)
+    plt.show(block=False)
+
     for i in range(episode_count):
         ob = env.reset()
         nb_iter = 0
@@ -60,6 +75,7 @@ if __name__ == '__main__':
         agent.set_ep()
         print("EP " + str(i) + " - score " + str(nb_iter))
         results.append(nb_iter)
+
     agent.show_loss_learn()
     agent.show_max_val()
     plt.plot(results)
