@@ -12,7 +12,7 @@ from preprocess import Preprocess
 if __name__ == '__main__':
 
     # HYPERPARAMETERS
-    episode_count = 5
+    episode_count = 500
 
     # You can set the level to logger.DEBUG or logger.WARN if you
     # want to change the amount of output.
@@ -36,14 +36,14 @@ if __name__ == '__main__':
         # return episode_id % 1 == 0
 
 
-    buffer_size = 200000
-    epsilon = 0.2
+    buffer_size = 500000
+    epsilon = 0.5
     batch_size = 32
     gamma = 0.95
     eta = 0.00025
     N = 10000
     populate = True
-    nb_pop = 200
+    nb_pop = 40000
 
     debug = True
 
@@ -133,7 +133,7 @@ if __name__ == '__main__':
     agent.show_q_values()
     env_train.close()
     env_test.close()
-    #agent.save_model()
+    agent.save_model()
 
     # Note there's no env.render() here. But the environment still can open window and
     # render if asked by env.monitor: it calls env.render('rgb_array') to record video.

@@ -112,9 +112,9 @@ class Agent(object):
     def show_q_values(self):
         colors = ['red', 'blue', 'yellow', 'green']
         for i in range(4):
-            plt.scatter(self.arr_q_value[i]["Q"],self.arr_q_value[i]["step"],s=0.5, label="Action : " + str(i),
+            plt.scatter(self.arr_q_value[i]["step"],self.arr_q_value[i]["Q"],s=0.5, label="Action : " + str(i),
                         color=colors[i])
-        plt.xlabel('Iteration')
+        plt.xlabel('step')
         plt.ylabel('max Q value')
         plt.title('Q value progress')
         plt.legend()
