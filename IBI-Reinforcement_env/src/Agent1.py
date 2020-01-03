@@ -22,8 +22,8 @@ class Agent(object):
         self.N = N
         self.count_N = 0
         self.memory = Memory(buffer_size)
-        self.qlearning_nn = DQN.DQN_two(32,64)
-        self.target_network = DQN.DQN_two(32,64)
+        self.qlearning_nn = DQN.DQN_two(32,32)
+        self.target_network = DQN.DQN_two(32,32)
         self.target_network.load_state_dict(self.qlearning_nn.state_dict())
         self.optimiser = torch.optim.Adam(self.qlearning_nn.parameters(), lr=self.eta)
         self.episode = 0
@@ -34,6 +34,7 @@ class Agent(object):
             "count": 0,
             "value": 0
         }
+        self.arr_max_q_val = []
 
     def act(self, observation, reward, done):
         qvalues = self.qlearning_nn(torch.Tensor(observation).reshape(1, 4))
@@ -51,9 +52,12 @@ class Agent(object):
 
     def politique_greedy(self, qval):
         qval_np = qval.clone().detach().numpy()
+        a = np.argmax(qval_np[0])
+        self.arr_max_q_val.append(qval_np[0][a])
         if random.random() < self.eps:
             return random.randint(0, len(qval_np[0]) - 1)
-        return np.argmax(qval_np[0])
+        print(qval_np[0])
+        return a
 
     # FIXME index
     def politique_boltzmann(self, qval, tau):

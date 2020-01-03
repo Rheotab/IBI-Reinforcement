@@ -37,7 +37,7 @@ if __name__ == '__main__':
     env = wrappers.Monitor(env, video_callable=recorder, directory=outdir, force=True)
     env.seed(0)
     agent = Agent(nb_ep=episode_count, action_space=env.action_space, buffer_size=1500, epsilon=0.5, batch_size=32,
-                  gamma=0.8, eta=0.0005, N=700)
+                  gamma=1, eta=0.001, N=700)
 
     reward = 0
     done = False

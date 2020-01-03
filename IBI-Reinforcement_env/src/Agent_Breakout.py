@@ -31,7 +31,7 @@ class Agent(object):
         self.qlearning_nn = Net()
         self.target_network = Net()
         self.target_network.load_state_dict(self.qlearning_nn.state_dict())
-        self.optimiser = torch.optim.Adam(self.qlearning_nn.parameters(), lr=self.eta)
+        self.optimiser = torch.optim.RMSprop(self.qlearning_nn.parameters(), lr=self.eta)
         self.arr_loss = []
 
     def act(self, observation, reward, done):
