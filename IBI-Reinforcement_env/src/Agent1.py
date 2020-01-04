@@ -74,7 +74,7 @@ class Agent(object):
             self.arr_max_q_val_o["arr"].append(qval_np[0][a])
             self.arr_max_q_val_o["step"].append(self.step)
         if random.random() < self.eps:
-            return random.randint(0, len(qval_np[0]) - 1)
+            a = random.randint(0, len(qval_np[0]) - 1)
         return a
 
     # FIXME index
@@ -130,7 +130,7 @@ class Agent(object):
 
     def learn_m(self):
         states, actions, next, rewards, done = self.memory.get_mini_batch_dim(self.batch_size)
-        self.count_N += self.batch_size
+        self.count_N += 1
         qvalues = self.qlearning_nn(states)
         qval_prec = []
         for i in range(self.batch_size):

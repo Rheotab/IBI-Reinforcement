@@ -12,9 +12,13 @@ import copy
 
 
 class Agent(object):
-    def __init__(self, action_space, buffer_size=100000, epsilon=0.1, batch_size=50, gamma=0.8, eta=0.005,
-                 N=100):
+    def __init__(self,ep_total, action_space, buffer_size, epsilon, batch_size, gamma, eta,
+                 N, epsilon_min=0.05):
+        self.ep_total = ep_total
+        self.ep = 0
         self.action_space = action_space
+        self.epsilon_min = epsilon_min
+        self.epsilon = epsilon
         self.eps = epsilon  # e-greedy
         self.batch_size = batch_size  # what do we learn
         self.gamma = gamma  # how much is the importance of reward in learning
@@ -70,7 +74,12 @@ class Agent(object):
             k = np.random.choice(a) + 1
         return k
 
-
+    def set_epsilon(self):
+        self.ep += 1
+        if self.ep_total < self.ep:
+            self.eps = self.epsilon_min
+        else:
+            self.eps = self.epsilon - ((self.epsilon - self.epsilon_min) * (1 - (self.ep_total - self.ep) / self.ep_total))
 
     def random_act(self):
         return int(self.action_space.sample())

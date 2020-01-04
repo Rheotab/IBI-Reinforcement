@@ -37,8 +37,8 @@ if __name__ == '__main__':
     # env = AtariPreprocessing(env)
     env = wrappers.Monitor(env, video_callable=recorder, directory=outdir, force=True)
     env.seed(0)
-    agent = Agent(nb_ep=episode_count, action_space=env.action_space, buffer_size=10000, epsilon=0.2, batch_size=32,
-                  gamma=1, eta=0.001, N=700)
+    agent = Agent(nb_ep=episode_count, action_space=env.action_space, buffer_size=5000, epsilon=1, batch_size=32,
+                  gamma=1, eta=0.001, N=100)
 
     reward = 0
     done = False
@@ -73,7 +73,7 @@ if __name__ == '__main__':
             # print(interaction)
             agent.memorise(interaction)
             if not populate:
-                agent.learn_m()
+                agent.learn()
             nb_iter += 1
         if populate:
             nbpop -= nb_iter

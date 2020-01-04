@@ -34,7 +34,7 @@ if __name__ == '__main__':
 
 
     buffer_size = 500000
-    epsilon = 0.5
+    epsilon = 0.99
     batch_size = 32
     gamma = 0.95
     eta = 0.00025
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     env_test.seed(0)
     agent = Agent(action_space=env_train.action_space, buffer_size=buffer_size, epsilon=epsilon,
                   batch_size=batch_size,
-                  gamma=gamma, eta=eta, N=N)
+                  gamma=gamma, eta=eta, N=N, ep_total=1000)
 
     reward = 0
     done = False
@@ -100,6 +100,7 @@ if __name__ == '__main__':
             agent.learn_m()
             nb_iter += 1
             score += reward
+        agent.set_epsilon()
         i += nb_iter
         agent.reset_noop()
         print("TRAIN")
