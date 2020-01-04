@@ -47,7 +47,9 @@ class Agent(object):
     def act(self, observation, reward, done):
         self.step += 1
         qvalues = self.qlearning_nn(torch.Tensor(observation).reshape(1, 4))
-        value = self.politique_greedy(qvalues)
+
+        #value = self.politique_greedy(qvalues)
+        value = self.politique_boltzmann(qvalues, 0.5)
         return value
 
     def set_epsilon(self):
@@ -77,21 +79,27 @@ class Agent(object):
             a = random.randint(0, len(qval_np[0]) - 1)
         return a
 
-    # FIXME index
     def politique_boltzmann(self, qval, tau):
-        qval_np = qval.detach().numpy()
+        qval_np = qval.clone().detach().numpy()
         s = 0
+        #print(qval_np)
         prob = np.array([])
         for i in qval_np[0]:
-            s += np.exp(i / tau)
-        for a in qval_np:
-            p_a = np.exp(a / tau)
-            prob = np.append(prob, (p_a / s))
-            r = random.uniform(0, 1)
-            if r < prob[0]:
-                return 0
+            if i > 0:
+                s += np.exp(i / tau)
+        for a in qval_np[0]:
+            if a > 0:
+                p_a = np.exp(a / tau)
             else:
-                return 1
+                p_a = 0
+            prob = np.append(prob, (p_a / s))
+
+        r = random.uniform(0, 1)
+        sm = 0
+        for j in range (len(prob)):
+            sm += prob[j]
+            if r < sm:
+                return j
 
     def learn(self):
         minibatch = self.memory.get_mini_batch(self.batch_size)

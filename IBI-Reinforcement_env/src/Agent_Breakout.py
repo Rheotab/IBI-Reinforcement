@@ -84,10 +84,27 @@ class Agent(object):
     def random_act(self):
         return int(self.action_space.sample())
 
-    # FIXME index
     def politique_boltzmann(self, qval, tau):
-        # TODO
-        pass
+        qval_np = qval.clone().detach().numpy()
+        s = 0
+        # print(qval_np)
+        prob = np.array([])
+        for i in qval_np[0]:
+            if i > 0:
+                s += np.exp(i / tau)
+        for a in qval_np[0]:
+            if a > 0:
+                p_a = np.exp(a / tau)
+            else:
+                p_a = 0
+            prob = np.append(prob, (p_a / s))
+
+        r = random.uniform(0, 1)
+        sm = 0
+        for j in range(len(prob)):
+            sm += prob[j]
+            if r < sm:
+                return j
 
     def learn(self):
         minibatch = self.memory.get_mini_batch(self.batch_size)
