@@ -1,4 +1,5 @@
 import random
+import numpy as np
 import torch
 
 class Memory:
@@ -21,4 +22,12 @@ class Memory:
         done = []
         states = []
         next = []
-        # todo
+        actions = []
+        for i in range(size):
+            interaction = random.choice(self.buffer)
+            states.append(interaction[0])
+            actions.append(interaction[1])
+            next.append(interaction[2])
+            rewards.append(interaction[3])
+            done.append(int(not interaction[4])) # If Done = False -> Agent done (used for computation of y in agent)
+        return torch.Tensor(states), np.array(actions), torch.Tensor(next), torch.Tensor(rewards), torch.Tensor(done)

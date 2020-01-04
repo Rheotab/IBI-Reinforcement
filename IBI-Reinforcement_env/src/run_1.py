@@ -10,7 +10,7 @@ import time
 if __name__ == '__main__':
 
     # HYPERPARAMETERS
-    episode_count = 100
+    episode_count = 5000
 
     # You can set the level to logger.DEBUG or logger.WARN if you
     # want to change the amount of output.
@@ -31,7 +31,7 @@ if __name__ == '__main__':
     # outdir = '/tmp/BreakoutNoFrameskip-v4'
 
     def recorder(episode_id):
-        return episode_id % 10 == 0
+        return episode_id % 100 == 0
 
 
     # env = AtariPreprocessing(env)
@@ -70,7 +70,7 @@ if __name__ == '__main__':
             interaction = (prec_ob, action, ob, reward, done)
             # print(interaction)
             agent.memorise(interaction)
-            agent.learn()
+            agent.learn_m()
             nb_iter += 1
         agent.set_ep()
         print("EP " + str(i) + " - score " + str(nb_iter))
