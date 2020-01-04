@@ -11,9 +11,6 @@ from preprocess import Preprocess
 
 if __name__ == '__main__':
 
-    # HYPERPARAMETERS
-    episode_count = 500
-
     # You can set the level to logger.DEBUG or logger.WARN if you
     # want to change the amount of output.
     logger.set_level(logger.INFO)
@@ -41,10 +38,11 @@ if __name__ == '__main__':
     batch_size = 32
     gamma = 0.95
     eta = 0.00025
-    N = 10000
+    N = 5000
     populate = True
-    nb_pop = 500
-
+    nb_pop = 20000
+    min_train_step = 10000
+    episode_count = 10
     debug = True
 
     env_test = wrappers.Monitor(env_test, video_callable=recorder, directory=outdir, force=True)
@@ -53,7 +51,7 @@ if __name__ == '__main__':
     env_train = Preprocess(env_train, train=True)
     env_train.seed(0)
     env_test.seed(0)
-    agent = Agent(nb_ep=episode_count, action_space=env_train.action_space, buffer_size=buffer_size, epsilon=epsilon,
+    agent = Agent(action_space=env_train.action_space, buffer_size=buffer_size, epsilon=epsilon,
                   batch_size=batch_size,
                   gamma=gamma, eta=eta, N=N)
 
@@ -61,7 +59,6 @@ if __name__ == '__main__':
     done = False
 
     if debug:
-        print("NB EP : " + str(episode_count))
         print("Action Space : " + str(env_train.action_space))
         print("Meanings : " + str(env_train.get_action_meanings()))
         print("BUFFER SIZE : " + str(buffer_size))
@@ -87,7 +84,8 @@ if __name__ == '__main__':
                 agent.memorise(interaction)
             agent.reset_noop()
 
-    for i in tqdm(range(episode_count)):
+    i = 0
+    while i < min_train_step:
         ob, reward, done, _ = env_train.reset()
         nb_iter = 0
         done = False
@@ -99,35 +97,37 @@ if __name__ == '__main__':
             interaction = (prec_ob, action, ob, reward, done)
             # print(interaction)
             agent.memorise(interaction)
-            agent.learn()
+            agent.learn_m()
             nb_iter += 1
             score += reward
+        i += nb_iter
         agent.reset_noop()
         print("TRAIN")
-        print("EP " + str(i) + " - score " + str(score))
-        print("EP " + str(i) + " - iteration " + str(nb_iter))
-        print("I saw " + agent.how_many_did_u_see() + " interaction so far")
+        print("SCORE : " + str(score))
+        print("Iteration : " + str(nb_iter))
+        print(str(i) + " / " + str(min_train_step))
+        results_train.append(score)
+
+    print("TEST")
+    print("NB EP : " + str(episode_count))
+    i = 0
+    for i in tqdm(range(episode_count)):
         done = False
         score = 0
         nb_iter = 0
-        results_train.append(score)
-        if i % 4 == 0:
-            ob, reward, done, _ = env_test.reset()
-            while not done:
-                action = agent.act(ob, reward, done)
-                prec_ob = ob
-                ob, reward, done, _ = env_test.step(action)
-                interaction = (prec_ob, action, ob, reward, done)
-                # print(interaction)
-                agent.memorise(interaction)
-                # agent.learn()
-                nb_iter += 1
-                score += reward
-            agent.reset_noop()
-            print("TEST")
-            print("EP " + str(i) + " - score " + str(score))
-            print("EP " + str(i) + " - iteration " + str(nb_iter))
-            print("I saw " + agent.how_many_did_u_see() + " interaction so far")
+        ob, reward, done, _ = env_test.reset()
+        while not done:
+            action = agent.act(ob, reward, done)
+            prec_ob = ob
+            ob, reward, done, _ = env_test.step(action)
+            interaction = (prec_ob, action, ob, reward, done)
+            # print(interaction)
+            agent.memorise(interaction)
+            # agent.learn()
+            nb_iter += 1
+            score += reward
+        agent.reset_noop()
+        print("EP " + str(i + 1) + " - score " + str(score))
         results_test.append(score)
     agent.show_loss()
     agent.show_q_values()
@@ -135,9 +135,9 @@ if __name__ == '__main__':
     env_test.close()
     agent.save_model()
 
-    # Note there's no env.render() here. But the environment still can open window and
-    # render if asked by env.monitor: it calls env.render('rgb_array') to record video.
-    # Video is not recorded every episode, see capped_cubic_video_schedule for details.
+# Note there's no env.render() here. But the environment still can open window and
+# render if asked by env.monitor: it calls env.render('rgb_array') to record video.
+# Video is not recorded every episode, see capped_cubic_video_schedule for details.
 
-    # Close the env and write monitor result info to disk
-    # env.close()
+# Close the env and write monitor result info to disk
+# env.close()

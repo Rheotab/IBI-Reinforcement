@@ -10,6 +10,8 @@ class DQN_one(torch.nn.Module):
         self.nn2 = torch.nn.Linear(D_H, D_out)
         torch.nn.init.xavier_uniform_(self.nn1.weight, gain=torch.nn.init.calculate_gain('relu'))
         torch.nn.init.xavier_uniform_(self.nn2.weight, gain=torch.nn.init.calculate_gain('relu'))
+        #torch.nn.init.uniform_(self.nn2.weight)
+        #torch.nn.init.uniform_(self.nn1.weight)
         self.D_H1 = D_H
         self.D_out = D_out
 

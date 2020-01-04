@@ -31,11 +31,12 @@ Notre objectif dans un premier temps était d'aller le plus loin possible (exten
 - Le réseau a été fait en utilisant les modules pytorch.nn. On a fait plusieurs tests avec une, deux, ou trois couches de neuronnes cachées. 
 
 - Les deux politiques (e-greedy / exploration de Boltzmann) ont été faites. 
-On a choisi d'utiliser e-greedy puisqu'on est plus familier avec et que la politique importe peu, tant qu'il y a une exploration.
+On a choisi d'utiliser e-greedy puisqu'on est plus familier avec et que la politique importe peu, tant qu'il y a une exploration.  
+Epsilon va se degrader de plus en plus. Pour finalement atteindre une valeur minimale.
 
 - L'erreur (équation de Bellman) est calculé grâce au module mse_loss qui fait le calcul à notre place. 
 
-- La mise à jour du target network a été faite des deux façons propposées.
+- La mise à jour du target network a été faite grâce au compteur, plutôt que progressivement.
 
 - Résultats : Notre agent apprend correctement mais manque de stabilité. On aurait aimé avoir une courbe de progression linéaire mais ce n'est pas le cas.  
 Vous trouverez une vidéo de cartpole qui fait le meilleur score (500).
@@ -54,6 +55,6 @@ Vous trouverez une vidéo de cartpole qui fait le meilleur score (500).
 
 - Puisqu'on est passé par une liste python, le buffer d'exeperience n'a pas eu besoin d'être adapté.
 
-- On fait deux versions différentes du réseaux convolutionnels. Une qui correspond à l'architecture décrite dans le papier publié dans Nature, l'autre plus "custom".
-
+- On a fait deux versions différentes du réseaux convolutionnels. Une qui correspond à l'architecture décrite dans le papier publié dans Nature, l'autre plus "custom".
+- On initialise la mémoire de l'agent (40 000 episodes), pour eviter de sur-apprendre les premieres configurations. 
 - Résultats : L'apprentissage ne marche pas.... :'(

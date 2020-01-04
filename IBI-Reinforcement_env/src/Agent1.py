@@ -140,7 +140,7 @@ class Agent(object):
         qmax = torch.max(qvalues_next, dim=1)
         y = done * (self.gamma * qmax.values) + rewards
         # loss = (qval_prec - y)**2
-        loss = F.mse_loss(qval_prec, y, reduction='none')
+        loss = F.mse_loss(qval_prec, y)
         self.optimiser.zero_grad()
         loss.backward()
         self.optimiser.step()

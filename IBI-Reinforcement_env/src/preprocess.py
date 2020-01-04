@@ -65,7 +65,7 @@ class Preprocess(gym.Wrapper):
             res = np.asarray(res, dtype=np.float32) / 255.0
         else:
             res = np.asarray(res, dtype=np.uint8)
-        res = res.reshape((1, 4, 84, 84))
+        res = res.reshape((4, 84, 84))
         return res, R, done, None
 
     def reset(self, **kwargs):  # NoopReset

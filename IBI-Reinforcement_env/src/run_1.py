@@ -10,7 +10,7 @@ import time
 if __name__ == '__main__':
 
     # HYPERPARAMETERS
-    episode_count = 5000
+    episode_count = 10000
 
     # You can set the level to logger.DEBUG or logger.WARN if you
     # want to change the amount of output.
@@ -37,7 +37,7 @@ if __name__ == '__main__':
     # env = AtariPreprocessing(env)
     env = wrappers.Monitor(env, video_callable=recorder, directory=outdir, force=True)
     env.seed(0)
-    agent = Agent(nb_ep=episode_count, action_space=env.action_space, buffer_size=1500, epsilon=0.2, batch_size=32,
+    agent = Agent(nb_ep=episode_count, action_space=env.action_space, buffer_size=10000, epsilon=0.2, batch_size=32,
                   gamma=1, eta=0.001, N=700)
 
     reward = 0
@@ -45,7 +45,7 @@ if __name__ == '__main__':
 
     results = []
 
-
+    '''
     def update(i):
         xs = [j for j in range(len(results))]
         ax1.clear()
@@ -58,7 +58,9 @@ if __name__ == '__main__':
 
     ani = animation.FuncAnimation(fig, update, interval=100)
     plt.show(block=False)
-
+    '''
+    populate = True
+    nbpop = 100
     for i in range(episode_count):
         ob = env.reset()
         nb_iter = 0
@@ -70,8 +72,13 @@ if __name__ == '__main__':
             interaction = (prec_ob, action, ob, reward, done)
             # print(interaction)
             agent.memorise(interaction)
-            agent.learn_m()
+            if not populate:
+                agent.learn_m()
             nb_iter += 1
+        if populate:
+            nbpop -= nb_iter
+            if nbpop < 0:
+                populate = False
         agent.set_ep()
         print("EP " + str(i) + " - score " + str(nb_iter))
         results.append(nb_iter)

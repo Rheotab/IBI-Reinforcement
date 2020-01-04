@@ -12,7 +12,7 @@ import copy
 
 
 class Agent(object):
-    def __init__(self, nb_ep, action_space, buffer_size=100000, epsilon=0.1, batch_size=50, gamma=0.8, eta=0.005,
+    def __init__(self, action_space, buffer_size=100000, epsilon=0.1, batch_size=50, gamma=0.8, eta=0.005,
                  N=100):
         self.action_space = action_space
         self.eps = epsilon  # e-greedy
@@ -25,7 +25,8 @@ class Agent(object):
         self.qlearning_nn = Net()
         self.target_network = Net()
         self.target_network.load_state_dict(self.qlearning_nn.state_dict())
-        self.optimiser = torch.optim.RMSprop(self.qlearning_nn.parameters(), lr=self.eta, momentum=0.95, eps=1e-2)
+        #self.optimiser = torch.optim.RMSprop(self.qlearning_nn.parameters(), lr=self.eta, momentum=0.95, eps=1e-2)
+        self.optimiser = torch.optim.Adam(self.qlearning_nn.parameters(), lr=eta)
         self.arr_loss = []
         self.count_no_op = 0
         self.no_op_max = 30
@@ -68,6 +69,8 @@ class Agent(object):
             a = np.argwhere(qval_np[0][1:] == np.amax(qval_np[0][1:])).flatten()
             k = np.random.choice(a) + 1
         return k
+
+
 
     def random_act(self):
         return int(self.action_space.sample())
@@ -115,7 +118,7 @@ class Agent(object):
         qmax = torch.max(qvalues_next, dim=1)
         y = done * (self.gamma * qmax.values) + rewards
         # loss = (qval_prec - y)**2
-        loss = F.mse_loss(qval_prec, y, reduction='none')
+        loss = F.mse_loss(qval_prec, y, reduction='mean')
         self.optimiser.zero_grad()
         loss.backward()
         self.optimiser.step()
