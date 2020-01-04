@@ -10,7 +10,7 @@ import time
 if __name__ == '__main__':
 
     # HYPERPARAMETERS
-    episode_count = 10000
+    episode_count = 300
 
     # You can set the level to logger.DEBUG or logger.WARN if you
     # want to change the amount of output.
@@ -38,7 +38,7 @@ if __name__ == '__main__':
     env = wrappers.Monitor(env, video_callable=recorder, directory=outdir, force=True)
     env.seed(0)
     agent = Agent(nb_ep=episode_count, action_space=env.action_space, buffer_size=5000, epsilon=1, batch_size=32,
-                  gamma=1, eta=0.001, N=100)
+                  gamma=1, eta=0.001, N=700)
 
     reward = 0
     done = False
