@@ -39,7 +39,7 @@ class Agent(object):
 
     def act(self, observation, reward, done):
         self.step += 1
-        qvalues = self.qlearning_nn(torch.Tensor(observation))
+        qvalues = self.qlearning_nn(torch.Tensor(observation.reshape((1,4,84,84))))
         value = int(self.politique_greedy(qvalues))
         if value == 0:
             self.count_no_op += 1
@@ -102,6 +102,27 @@ class Agent(object):
                 self.count_N = 0
                 print("TARGET")
                 self.target_network.load_state_dict(self.qlearning_nn.state_dict())
+
+    def learn_m(self):
+        states, actions, next, rewards, done = self.memory.get_mini_batch_dim(self.batch_size)
+        self.count_N += self.batch_size
+        qvalues = self.qlearning_nn(states)
+        qval_prec = []
+        for i in range(self.batch_size):
+            qval_prec.append(qvalues[i][actions[i]])
+        qval_prec = torch.Tensor(qval_prec)
+        qvalues_next = self.target_network(next)
+        qmax = torch.max(qvalues_next, dim=1)
+        y = done * (self.gamma * qmax.values) + rewards
+        # loss = (qval_prec - y)**2
+        loss = F.mse_loss(qval_prec, y, reduction='none')
+        self.optimiser.zero_grad()
+        loss.backward()
+        self.optimiser.step()
+        if self.N <= self.count_N:
+            self.count_N = 0
+            print("TARGET")
+            self.target_network.load_state_dict(self.qlearning_nn.state_dict())
 
     def show_loss(self):
         plt.plot(self.arr_loss)

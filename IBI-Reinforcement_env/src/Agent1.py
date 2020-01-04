@@ -136,6 +136,27 @@ class Agent(object):
                 # self.target_network = copy.deepcopy(self.qlearning_nn)
                 self.target_network.load_state_dict(self.qlearning_nn.state_dict())
 
+    def learn_m(self):
+        states, actions, next, rewards, done = self.memory.get_mini_batch_dim(self.batch_size)
+        self.count_N += self.batch_size
+        qvalues = self.qlearning_nn(states)
+        qval_prec = []
+        for i in range(self.batch_size):
+            qval_prec.append(qvalues[i][actions[i]])
+        qval_prec = torch.Tensor(qval_prec)
+        qvalues_next = self.target_network(next)
+        qmax = torch.max(qvalues_next, dim=1)
+        y = done * (self.gamma * qmax.values) + rewards
+        # loss = (qval_prec - y)**2
+        loss = F.mse_loss(qval_prec, y, reduction='none')
+        self.optimiser.zero_grad()
+        loss.backward()
+        self.optimiser.step()
+        if self.N <= self.count_N:
+            self.count_N = 0
+            print("TARGET")
+            self.target_network.load_state_dict(self.qlearning_nn.state_dict())
+
     def show_mean_loss_ep(self):
         plt.plot(self.arr_mean_loss)
         plt.title("Ep_Avg_LOSS")
@@ -149,8 +170,8 @@ class Agent(object):
         plt.show()
 
     def show_max_val(self):
-        plt.scatter(self.arr_max_q_val_o['step'], self.arr_max_q_val_o['arr'], label='Scatter Ones', color='r')
-        plt.scatter(self.arr_max_q_val_z['step'],self.arr_max_q_val_z['arr'], label='Scatter Zeros', color='blue')
+        plt.scatter(self.arr_max_q_val_o['step'], self.arr_max_q_val_o['arr'], s=0.5,label='Scatter Ones', color='r')
+        plt.scatter(self.arr_max_q_val_z['step'],self.arr_max_q_val_z['arr'], s=0.5,label='Scatter Zeros', color='blue')
         plt.xlabel('Iteration')
         plt.ylabel('max Q value')
         plt.title('Q value progress')

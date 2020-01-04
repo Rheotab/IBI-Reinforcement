@@ -43,7 +43,7 @@ if __name__ == '__main__':
     eta = 0.00025
     N = 10000
     populate = True
-    nb_pop = 40000
+    nb_pop = 500
 
     debug = True
 

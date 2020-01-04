@@ -24,6 +24,7 @@ class Preprocess(gym.Wrapper):
         self.ale = env.unwrapped.ale
         self.noop_max = noop_max
         self.lives = self.ale.lives()
+        self.last_frame = None
         # pd = self.env.unwrapped.get_action_meanings()
         # print("iuha")
 
@@ -31,7 +32,7 @@ class Preprocess(gym.Wrapper):
         R = 0.0
         res = None
         done = False
-
+        l_frame = None
         n_lives = self.ale.lives()
         for t in range(self.size_wrap):
             ob, reward, done, info = self.env.step(action)
@@ -46,6 +47,7 @@ class Preprocess(gym.Wrapper):
                 res = np.array([ob])
             else:
                 res = np.append(res, [ob], axis=0)
+            l_frame = ob
             if done:
                 break
         self.lives = n_lives
@@ -54,6 +56,11 @@ class Preprocess(gym.Wrapper):
             for k in range(i - 1, self.skip_frame - 1):
                 res = np.append(res, [res[k]], axis=0)
         np.maximum(res[self.size_wrap - 2], res[self.size_wrap - 1], out=res[self.size_wrap - 1])
+        np.maximum(res[self.size_wrap - 3], res[self.size_wrap - 2], out=res[self.size_wrap - 2])
+        np.maximum(res[self.size_wrap - 4], res[self.size_wrap - 3], out=res[self.size_wrap - 3])
+        if self.last_frame is not None:
+            np.maximum(self.last_frame, res[self.size_wrap - 4], out=res[self.size_wrap - 4])
+        self.last_frame = l_frame
         if self.norm:
             res = np.asarray(res, dtype=np.float32) / 255.0
         else:
