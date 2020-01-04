@@ -133,7 +133,7 @@ class Agent(object):
                 self.target_network.load_state_dict(self.qlearning_nn.state_dict())
 
     def learn_m(self):
-        states, actions, next, rewards, done = self.memory.get_mini_batch_dim(self.batch_size)
+        states, actions, next, rewards, notdone = self.memory.get_mini_batch_dim(self.batch_size)
         self.count_N += self.batch_size
         qvalues = self.qlearning_nn(states)
         qval_prec = []
@@ -142,7 +142,7 @@ class Agent(object):
         qval_prec = torch.Tensor(qval_prec)
         qvalues_next = self.target_network(next)
         qmax = torch.max(qvalues_next, dim=1)
-        y = done * (self.gamma * qmax.values) + rewards
+        y = notdone * (self.gamma * qmax.values) + rewards
         # loss = (qval_prec - y)**2
         loss = F.mse_loss(qval_prec, y, reduction='mean')
         self.optimiser.zero_grad()
