@@ -7,8 +7,6 @@ Inspired by
 https://github.com/openai/gym/blob/master/gym/wrappers/atari_preprocessing.py
 [Mnih et al., 2015] Human- level control through deep reinforcement learning. Nature, 518(7540) :529.
 
-TODO : 
-- DONE = Number of Lives or TRUE (game end)
 '''
 
 

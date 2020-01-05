@@ -20,14 +20,7 @@ class Net(torch.nn.Module):
         return x_nn2
 
 '''
-'''
 
-THIS IS NETWORK WE HAVE TO USE AND TRAIN AT LEAST ONCE. 
-=> I got this from paper
-
-TODO : SAVE WEIGHTS IN FILE. 
-
-'''
 class Net(torch.nn.Module):
     def __init__(self, D_out=4):
         super(Net, self).__init__()

@@ -37,12 +37,12 @@ if __name__ == '__main__':
     epsilon = 0.99
     batch_size = 32
     gamma = 0.95
-    eta = 0.00025
+    eta = 0.001
     N = 5000
     populate = True
-    nb_pop = 20000
-    min_train_step = 10000
-    episode_count = 10
+    nb_pop = 40000
+    min_train_step = 100000
+    episode_count = 100
     debug = True
 
     env_test = wrappers.Monitor(env_test, video_callable=recorder, directory=outdir, force=True)
@@ -123,7 +123,7 @@ if __name__ == '__main__':
             ob, reward, done, _ = env_test.step(action)
             interaction = (prec_ob, action, ob, reward, done)
             # print(interaction)
-            agent.memorise(interaction)
+            # agent.memorise(interaction)
             # agent.learn()
             nb_iter += 1
             score += reward
