@@ -5,7 +5,6 @@ from gym import wrappers, logger
 import numpy as np
 import time
 from Agent_Breakout import Agent
-from tqdm import tqdm
 # from atari_preprocess import AtariPreprocessing
 from preprocess import Preprocess
 
@@ -73,7 +72,7 @@ if __name__ == '__main__':
     if populate:
         env_pop = gym.make(env_id)
         env_pop = Preprocess(env_pop, train=True)
-        for i in tqdm(range(nb_pop)):
+        for i in range(nb_pop):
             done = False
             ob, reward, done, _ = env_pop.reset()
             while not done:
@@ -112,7 +111,7 @@ if __name__ == '__main__':
     print("TEST")
     print("NB EP : " + str(episode_count))
     i = 0
-    for i in tqdm(range(episode_count)):
+    for i in range(episode_count):
         done = False
         score = 0
         nb_iter = 0

@@ -48,8 +48,8 @@ class Agent(object):
         self.step += 1
         qvalues = self.qlearning_nn(torch.Tensor(observation).reshape(1, 4))
 
-        #value = self.politique_greedy(qvalues)
-        value = self.politique_boltzmann(qvalues, 0.5)
+        value = self.politique_greedy(qvalues)
+        # value = self.politique_boltzmann(qvalues, 0.5)
         return value
 
     def set_epsilon(self):
@@ -132,7 +132,7 @@ class Agent(object):
             self.optimiser.step()
             if self.N == self.count_N:
                 self.count_N = 0
-                print("TARGET")
+                # print("TARGET")
                 # self.target_network = copy.deepcopy(self.qlearning_nn)
                 self.target_network.load_state_dict(self.qlearning_nn.state_dict())
 

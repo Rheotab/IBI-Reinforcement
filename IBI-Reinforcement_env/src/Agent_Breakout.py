@@ -129,7 +129,7 @@ class Agent(object):
             self.optimiser.step()
             if self.N == self.count_N:
                 self.count_N = 0
-                print("TARGET")
+               # print("TARGET")
                 self.target_network.load_state_dict(self.qlearning_nn.state_dict())
 
     def learn_m(self):
@@ -150,7 +150,7 @@ class Agent(object):
         self.optimiser.step()
         if self.N <= self.count_N:
             self.count_N = 0
-            print("TARGET")
+            #print("TARGET")
             self.target_network.load_state_dict(self.qlearning_nn.state_dict())
 
     def show_loss(self):
