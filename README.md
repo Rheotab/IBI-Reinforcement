@@ -4,7 +4,7 @@
 Pour lancer la configuration (pipenv requis):
 
 1 - pipenv shell 
-2 - pip3 install requirements.txt
+2 - pip3 install -r requirements.txt
 
 ##### Pour lancer le cartpole : 
  - python3 run_1.py
