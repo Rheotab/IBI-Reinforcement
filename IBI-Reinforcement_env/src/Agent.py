@@ -49,7 +49,7 @@ class Agent(object):
 
     def get_action(self, observation):
         self.step += 1
-        qvalues = self.target(torch.Tensor(observation.reshape((1, 4, 84, 84)))) #FIXME
+        qvalues = self.target(torch.tensor(observation.reshape((1, 4, 84, 84)))) #FIXME
         value = int(self.politique_greedy(qvalues))
         if value == 0:
             print('NO OP ?????')
