@@ -28,11 +28,11 @@ if __name__ == '__main__':
     outdir = '/tmp/BreakoutNoFrameskip-v4'
 
     buffer_size = 500000
-    epsilon = 0.95
+    epsilon = 0.05
     batch_size = 32
     gamma = 0.95
     eta = 0.001
-    update_target = 10000
+    update_target = 100
 
 
     debug = True
@@ -81,6 +81,7 @@ if __name__ == '__main__':
             score += reward
         i += nb_iter
         print("TRAIN")
+        agent.tracker.add_score(score)
         print("SCORE : " + str(score))
         print("Iteration : " + str(nb_iter))
 

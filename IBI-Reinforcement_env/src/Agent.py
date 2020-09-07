@@ -13,9 +13,9 @@ class Agent(object):
     def __init__(self, gamma, lr, buffer_size, update_target, epsilon, action_space, batch_size, pretrained_path=None):
 
         # CUDA variables
-        self.USE_CUDA = torch.cuda.is_available()
-        self.dtype = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor
-        self.dlongtype = torch.cuda.LongTensor if torch.cuda.is_available() else torch.LongTensor
+        #self.USE_CUDA = torch.cuda.is_available()
+        #self.dtype = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor
+        #self.dlongtype = torch.cuda.LongTensor if torch.cuda.is_available() else torch.LongTensor
 
         if pretrained_path is not None:
             # Load network from existing file.
@@ -45,11 +45,11 @@ class Agent(object):
         self.update_counter = 0  # Number of forward/backward between last reset (used for update target)
         self.memory = Memory(self.buffer_size)
 
-        self.tracker = Tracker()
+        self.tracker = Tracker(show=False)
 
     def get_action(self, observation):
         self.step += 1
-        qvalues = self.target(torch.tensor(observation.reshape((1, 4, 84, 84)))) #FIXME
+        qvalues = self.target(torch.tensor(observation.reshape((1, 4, 84, 84))).type(torch.FloatTensor)) #FIXME
         value = int(self.politique_greedy(qvalues))
         if value == 0:
             print('NO OP ?????')
@@ -83,6 +83,7 @@ class Agent(object):
         y = notdone * (self.gamma * qmax.values) + rewards
         # loss = (qval_prec - y)**2
         loss = F.mse_loss(qval_prec, y, reduction='mean')
+        self.tracker.add_losses(loss)
         self.optimiser.zero_grad()
         loss.backward()
         self.optimiser.step()
