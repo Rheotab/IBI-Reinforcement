@@ -1,16 +1,16 @@
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 import gym
 import random
 from gym import wrappers, logger
 from Agent1 import Agent
 import numpy as np
 import time
-from atari_preprocess import AtariPreprocessing
 
 if __name__ == '__main__':
 
     # HYPERPARAMETERS
-    episode_count = 500
+    episode_count = 300
 
     # You can set the level to logger.DEBUG or logger.WARN if you
     # want to change the amount of output.
@@ -31,20 +31,41 @@ if __name__ == '__main__':
     # outdir = '/tmp/BreakoutNoFrameskip-v4'
 
     def recorder(episode_id):
-        return episode_id % 10 == 0
+        return episode_id % 100 == 0
 
 
     # env = AtariPreprocessing(env)
     env = wrappers.Monitor(env, video_callable=recorder, directory=outdir, force=True)
     env.seed(0)
+<<<<<<< HEAD
     agent = Agent(nb_ep=episode_count, action_space=env.action_space, buffer_size=2000, epsilon=0.5, batch_size=50,
                   gamma=0.8, eta=0.001, N=100)
+=======
+    agent = Agent(nb_ep=episode_count, action_space=env.action_space, buffer_size=5000, epsilon=1, batch_size=32,
+                  gamma=1, eta=0.001, N=700)
+>>>>>>> 0d0eef34ac5b49b646c0a5a7cd774ab3671661d0
 
     reward = 0
     done = False
 
     results = []
 
+    '''
+    def update(i):
+        xs = [j for j in range(len(results))]
+        ax1.clear()
+
+        ax1.plot(xs, results)
+
+
+    fig = plt.figure()
+    ax1 = fig.add_subplot(1,1,1)
+
+    ani = animation.FuncAnimation(fig, update, interval=100)
+    plt.show(block=False)
+    '''
+    populate = True
+    nbpop = 100
     for i in range(episode_count):
         ob = env.reset()
         nb_iter = 0
@@ -56,13 +77,23 @@ if __name__ == '__main__':
             interaction = (prec_ob, action, ob, reward, done)
             # print(interaction)
             agent.memorise(interaction)
-            agent.learn()
+            if not populate:
+                agent.learn()
             nb_iter += 1
+        if populate:
+            nbpop -= nb_iter
+            if nbpop < 0:
+                populate = False
+        agent.set_ep()
         print("EP " + str(i) + " - score " + str(nb_iter))
         results.append(nb_iter)
-    agent.show_mean_loss_ep()
+
+    agent.show_loss_learn()
+    agent.show_max_val()
     plt.plot(results)
-    plt.ylabel('number of iterations')
+    plt.xlabel('number of iterations')
+    plt.ylabel("score")
+    plt.title("Score")
     plt.show()
     # Note there's no env.render() here. But the environment still can open window and
     # render if asked by env.monitor: it calls env.render('rgb_array') to record video.

@@ -1,14 +1,12 @@
 import gym
 import numpy as np
 import cv2
-
+import matplotlib.pyplot as plt
 '''
 Inspired by
 https://github.com/openai/gym/blob/master/gym/wrappers/atari_preprocessing.py
 [Mnih et al., 2015] Human- level control through deep reinforcement learning. Nature, 518(7540) :529.
 
-TODO : 
-- DONE = Number of Lives or TRUE (game end)
 '''
 
 
@@ -24,6 +22,7 @@ class Preprocess(gym.Wrapper):
         self.ale = env.unwrapped.ale
         self.noop_max = noop_max
         self.lives = self.ale.lives()
+        self.last_frame = None
         # pd = self.env.unwrapped.get_action_meanings()
         # print("iuha")
 
@@ -31,22 +30,22 @@ class Preprocess(gym.Wrapper):
         R = 0.0
         res = None
         done = False
-
+        l_frame = None
         n_lives = self.ale.lives()
         for t in range(self.size_wrap):
             ob, reward, done, info = self.env.step(action)
             if n_lives != self.lives and self.train:
                 done = True
             R += reward
-
-            # Shape
-            ob = cv2.resize(ob, (self.screen_size, self.screen_size), interpolation=cv2.INTER_AREA)
             # Max R,G,B
             ob = np.max(ob, axis=2)
+            # Shape
+            ob = cv2.resize(ob, (self.screen_size, self.screen_size))
             if res is None:
                 res = np.array([ob])
             else:
                 res = np.append(res, [ob], axis=0)
+            l_frame = ob
             if done:
                 break
         self.lives = n_lives
@@ -55,11 +54,16 @@ class Preprocess(gym.Wrapper):
             for k in range(i - 1, self.skip_frame - 1):
                 res = np.append(res, [res[k]], axis=0)
         np.maximum(res[self.size_wrap - 2], res[self.size_wrap - 1], out=res[self.size_wrap - 1])
+        np.maximum(res[self.size_wrap - 3], res[self.size_wrap - 2], out=res[self.size_wrap - 2])
+        np.maximum(res[self.size_wrap - 4], res[self.size_wrap - 3], out=res[self.size_wrap - 3])
+        if self.last_frame is not None:
+            np.maximum(self.last_frame, res[self.size_wrap - 4], out=res[self.size_wrap - 4])
+        self.last_frame = l_frame
         if self.norm:
             res = np.asarray(res, dtype=np.float32) / 255.0
         else:
             res = np.asarray(res, dtype=np.uint8)
-        res = res.reshape((1, 4, 84, 84))
+        res = res.reshape((4, 84, 84))
         return res, R, done, None
 
     def reset(self, **kwargs):  # NoopReset
