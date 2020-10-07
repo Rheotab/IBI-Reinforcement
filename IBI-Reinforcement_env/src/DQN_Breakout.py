@@ -1,47 +1,43 @@
 import torch
 import torch.nn.functional as F
 import copy
+import torch.nn as nn
 
 '''
-class Net(torch.nn.Module):
-    def __init__(self, D_out=4):
-        super(Net, self).__init__()
-        self.conv1 = torch.nn.Conv2d(4, 32, kernel_size=8, stride=4)
-        self.conv2 = torch.nn.Conv2d(32, 64, kernel_size=4, stride=2)
-        self.nn1 = torch.nn.Linear(5184, 256)
-        self.nn2 = torch.nn.Linear(256, D_out)
-        self.D_out = D_out
-
-    def forward(self, x):
-        x_conv1 = F.relu(self.conv1(x))
-        x_conv2 = F.relu(self.conv2(x_conv1))
-        x_nn1 = F.relu(self.nn1(x_conv2.view(x_conv2.size(0), -1)))
-        x_nn2 = F.relu(self.nn2(x_nn1))
-        return x_nn2
-
+Dueling DQN
+Value and Advantage
 '''
+
 
 class Net(torch.nn.Module):
     def __init__(self, D_out=4):
         super(Net, self).__init__()
-        self.conv1 = torch.nn.Conv2d(4, 32, kernel_size=8, stride=4)
-        self.conv2 = torch.nn.Conv2d(32, 64, kernel_size=4, stride=2)
-        self.conv3 = torch.nn.Conv2d(64, 64, kernel_size=3, stride=1)
-        torch.nn.init.zeros_(self.conv1.weight)
-        torch.nn.init.zeros_(self.conv2.weight)
-        torch.nn.init.zeros_(self.conv3.weight)
-        self.nn1 = torch.nn.Linear(49 * 64, 512)
-        self.nn2 = torch.nn.Linear(512, D_out)
-        torch.nn.init.zeros_(self.nn1.weight)
-        torch.nn.init.zeros_(self.nn2.weight)
-        self.D_out = D_out
+        self.conv = nn.Sequential(
+            nn.Conv2d(4, 32, kernel_size=8, stride=4),
+            nn.ReLU(),
+            nn.Conv2d(32, 64, kernel_size=4, stride=2),
+            nn.ReLU(),
+            nn.Conv2d(64, 64, kernel_size=3, stride=1),
+            nn.ReLU()
+        )
+        self.fc_input_dim = 49 * 64
+        self.value = nn.Sequential(
+            nn.Linear(self.fc_input_dim, 128),
+            nn.ReLU(),
+            nn.Linear(128, 1)
+        )
 
+        self.advantage = nn.Sequential(
+            nn.Linear(self.fc_input_dim, 128),
+            nn.ReLU(),
+            nn.Linear(128, D_out)
+        )
 
-    def forward(self, x):
-        x_conv1 = F.relu(self.conv1(x))
-        x_conv2 = F.relu(self.conv2(x_conv1))
-        x_conv3 = F.relu(self.conv3(x_conv2))
-        x_nn1 = F.relu(self.nn1(x_conv3.view(x_conv3.size(0), -1)))
-        x_nn2 = F.relu(self.nn2(x_nn1))
-        return x_nn2
+    def forward(self, state):
+        features = self.conv(state)
+        features = features.view(features.size(0), -1)
+        values = self.value(features)
+        advantages = self.advantage(features)
+        qvals = values + (advantages - advantages.mean())
 
+        return qvals
