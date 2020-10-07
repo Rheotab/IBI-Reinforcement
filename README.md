@@ -1,16 +1,18 @@
 ### Intelligence Bio-inspirée
 
-##### 
+#####
 Pour lancer la configuration (pipenv requis):
-- pipenv shell 
+- pipenv shell
 - pip3 install -r requirements.txt
 
-##### Pour lancer le cartpole : 
+##### Pour lancer le cartpole :
  - python3 run_1.py
- 
- 
- ##### Pour lancer le breakout : 
+
+
+ ##### Pour lancer le breakout :
  - python3 run_breakout.py
- 
- 
- On a utilisé le paquet tqdm (cosmétique), qui n'est pas pris en charge par freeze. 
+
+
+ On a utilisé le paquet tqdm (cosmétique), qui n'est pas pris en charge par freeze.
+
+ test
