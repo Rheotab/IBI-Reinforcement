@@ -3,3 +3,5 @@
 *idea*
 *bin*
 *.DS_Store*
+.vscode
+IBI-Reinforcement_env/
