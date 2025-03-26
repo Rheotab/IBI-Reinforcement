@@ -5,3 +5,4 @@
 *.DS_Store*
 .vscode
 IBI-Reinforcement_env/
+__pycache__
