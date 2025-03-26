@@ -1,33 +1,18 @@
 import random
 import numpy as np
 import torch
+from collections import deque
 
+# Experience Replay Buffer
 class Memory:
-    def __init__(self, buffer_size):
-        self.buffer_size = buffer_size
-        self.buffer = []
-        self.count = 0
+    def __init__(self, capacity):
+        self.buffer = deque(maxlen=capacity)
 
-    def add(self, elem):
-        self.count += 1
-        if len(self.buffer) > self.buffer_size:
-            self.buffer.pop(0)
-        self.buffer.append(elem)
+    def add(self, state, action, reward, next_state, done):
+        self.buffer.append((state, action, reward, next_state, done))
 
-    def get_mini_batch(self, size):
-        return random.choices(self.buffer, k=size)
+    def sample(self, batch_size):
+        return random.sample(self.buffer, batch_size)
 
-    def get_mini_batch_dim(self, size):
-        rewards = []
-        done = []
-        states = []
-        next = []
-        actions = []
-        for i in range(size):
-            interaction = random.choice(self.buffer)
-            states.append(interaction[0])
-            actions.append(interaction[1])
-            next.append(interaction[2])
-            rewards.append(interaction[3])
-            done.append(int(not interaction[4])) # If Done = False -> Agent done (used for computation of y in agent)
-        return torch.Tensor(states), np.array(actions), torch.Tensor(next), torch.Tensor(rewards), torch.Tensor(done)
+    def size(self):
+        return len(self.buffer)

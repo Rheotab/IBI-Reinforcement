@@ -5,9 +5,9 @@ import torch.optim as optim
 import random
 import numpy as np
 from collections import deque
-import gym_tetris
 from Agent import DQNAgent
-
+import ale_py.roms as roms
+from preprocess import FrameProcessor
 
 
 
@@ -17,30 +17,35 @@ def recorder(episode_id):
 
 
 if __name__ == '__main__':
-   
-    episodes=500
-    batch_size=32
-    target_update=10
-    env = gym.make("LunarLander-v3", render_mode="human")  
-    state_dim = env.observation_space.shape[0]
+    print(roms.get_all_rom_ids())
+    episodes = 1000
+    batch_size = 32
+    target_update = 50
+    env = gym.make("ALE/Breakout-v5", render_mode="rgb_array") 
+
+    frameproc = FrameProcessor()
+    state_dim = 4
     action_dim = env.action_space.n
     agent = DQNAgent(state_dim, action_dim)
 
     for episode in range(episodes):
         state, _ = env.reset()
+        state = frameproc.process(state)
         total_reward = 0
         done = False
 
         while not done:
             action = agent.select_action(state)
             next_state, reward, done, _, _ = env.step(action)
-
-            agent.replay_buffer.add(state, action, reward, next_state, done)
+            next_state = frameproc.process(next_state)
+            
+            agent.add_experience(state, action, reward, next_state, done)
             state = next_state
             total_reward += reward
 
             agent.train(batch_size)
 
+        agent.print_avg_qvalue()
         if episode % target_update == 0:
             agent.update_target_network()
 
