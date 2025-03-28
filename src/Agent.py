@@ -63,7 +63,7 @@ class DQNAgent:
 
         # Compute Double DQN target Q-values
         next_actions = self.q_network(next_states).argmax(1, keepdim=True)
-        next_q_values = self.target_network(next_states).gather(1, next_actions).squeeze()
+        next_q_values = self.target_network(next_states).max(1)[0]  # Use max Q-value
         target_q_values = rewards + (1 - dones) * self.gamma * next_q_values
         
 
@@ -77,7 +77,7 @@ class DQNAgent:
      #   torch.nn.utils.clip_grad_norm_(self.q_network.parameters(), max_norm=1.0)
         self.optimizer.step()
 
-        self.next_q_values_save.append(next_q_values.detach().numpy())
+        self.next_q_values_save.append(next_q_values.detach().cpu().numpy())
         self.loss_save.append(loss.item())
         # Decay epsilon
         if self.epsilon > self.epsilon_min:
@@ -87,7 +87,10 @@ class DQNAgent:
         print(np.mean(self.next_q_values_save))
         print(np.mean(self.loss_save))
         self.next_q_values_save = []
-        self.loss_save  = []
+        self.loss_saveave  = []
 
     def update_target_network(self):
         self.target_network.load_state_dict(self.q_network.state_dict())
+
+    def save_model(self):
+        torch.save(self.q_network.state_dict(), "model.path")

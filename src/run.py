@@ -18,11 +18,11 @@ def recorder(episode_id):
 
 if __name__ == '__main__':
     print(roms.get_all_rom_ids())
-    episodes = 1000
+    episodes = 10000
     batch_size = 32
-    target_update = 50
-    env = gym.make("ALE/Breakout-v5", render_mode="rgb_array") 
-
+    target_update = 150
+    env = gym.make("BreakoutNoFrameskip-v4")  # No frameskip ensures smooth ball movement
+    env = FrameStack(env, 4)  # Stack 4 frames as input
     frameproc = FrameProcessor()
     state_dim = 4
     action_dim = env.action_space.n
@@ -36,6 +36,7 @@ if __name__ == '__main__':
 
         while not done:
             action = agent.select_action(state)
+            print(action)
             next_state, reward, done, _, _ = env.step(action)
             next_state = frameproc.process(next_state)
             
@@ -48,6 +49,7 @@ if __name__ == '__main__':
         agent.print_avg_qvalue()
         if episode % target_update == 0:
             agent.update_target_network()
+            agent.save_model()
 
         print(f"Episode {episode + 1}/{episodes}, Total Reward: {total_reward}, Epsilon: {agent.epsilon:.3f}")
 
